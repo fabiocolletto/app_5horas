@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genoma v1.2</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0b132b;
+      color: #e0e6ed;
+    }
+
+    header {
+      padding: 1rem;
+      background: #1c2541;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      gap: 1rem;
+    }
+
+    .status {
+      padding: 1rem;
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Genoma v1.2</strong>
+  </header>
+  <main id="genoma-shell">
+    <section class="status" aria-live="polite">
+      <p>O Genoma está inicializando e aguardando células registradas.</p>
+      <p id="genoma-status"></p>
+    </section>
+    <div id="genoma-root" role="main"></div>
+  </main>
+  <script type="module" src="./genoma.js"></script>
+</body>
+</html>

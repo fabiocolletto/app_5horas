@@ -5,8 +5,10 @@ class Genoma {
     this.root = document.getElementById('genoma-root');
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
+    this.profileKey = 'genoma.profile';
+    this.profile = this.loadProfile();
 
-    this.defaultCell = 'sistema.welcome';
+    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
 
     this.registerNavigation();
     this.reportBootstrap();
@@ -40,17 +42,25 @@ class Genoma {
   }
 
   loadCell(name) {
-    const cell = this.manifest.find((entry) => entry.name === name);
+    this.profile = this.loadProfile();
+    const needsProfile = name !== 'sistema.perfil' && !this.profile;
+    const targetName = needsProfile ? 'sistema.perfil' : name;
+
+    if (needsProfile) {
+      this.updateStatus('Perfil não encontrado. Redirecionando para cadastro.');
+    }
+
+    const cell = this.manifest.find((entry) => entry.name === targetName);
 
     if (!cell) {
-      this.updateStatus(`Célula "${name}" não encontrada no manifesto.`);
+      this.updateStatus(`Célula "${targetName}" não encontrada no manifesto.`);
       return;
     }
 
     import(cell.module)
       .then((module) => {
         if (typeof module.mount !== 'function') {
-          this.updateStatus(`Célula "${name}" não expõe a função mount.`);
+          this.updateStatus(`Célula "${targetName}" não expõe a função mount.`);
           return;
         }
 
@@ -58,11 +68,11 @@ class Genoma {
           this.root.replaceChildren();
           module.mount(this.root);
         }
-        this.updateStatus(`Célula "${name}" carregada.`);
+        this.updateStatus(`Célula "${targetName}" carregada.`);
       })
       .catch((error) => {
         console.error(error);
-        this.updateStatus(`Falha ao carregar célula "${name}".`);
+        this.updateStatus(`Falha ao carregar célula "${targetName}".`);
       });
   }
 
@@ -70,6 +80,26 @@ class Genoma {
     if (this.status) {
       this.status.textContent = message;
     }
+  }
+
+  loadProfile() {
+    const raw = window.localStorage.getItem(this.profileKey);
+
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const profile = JSON.parse(raw);
+
+      if (typeof profile?.nome === 'string' && typeof profile?.papel === 'string') {
+        return profile;
+      }
+    } catch (error) {
+      console.warn('Falha ao ler perfil armazenado.', error);
+    }
+
+    return null;
   }
 }
 

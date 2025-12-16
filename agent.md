@@ -6,7 +6,7 @@ Este documento registra o andamento das etapas oficiais. Consulte o `CHANGELOG.m
 - [x] Etapa 1 — Bootstrap do Repositório (concluída)
 - [x] Etapa 2 — Células Base
 - [x] Etapa 3 — Célula Perfil
-- [ ] Etapa 4 — Células Funcionais
+- [x] Etapa 4 — Células Funcionais
 - [ ] Etapa 5 — Estabilização
 
 ## Regras de Validação

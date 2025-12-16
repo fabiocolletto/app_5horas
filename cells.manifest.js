@@ -5,4 +5,6 @@ export const cellsManifest = [
   { name: 'sistema.welcome', module: './celulas/sistema.welcome.js' },
   { name: 'home', module: './celulas/home.js' },
   { name: 'sistema.perfil', module: './celulas/sistema.perfil.js' },
+  { name: 'finance', module: './celulas/finance.js' },
+  { name: 'education', module: './celulas/education.js' },
 ];

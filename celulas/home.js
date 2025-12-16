@@ -59,7 +59,41 @@ export function mount(host) {
     }));
   });
 
-  actions.append(action, profileAction);
+  const financeAction = document.createElement('button');
+  financeAction.textContent = 'Ir para Financeiro';
+  financeAction.style.padding = '0.75rem 1.25rem';
+  financeAction.style.borderRadius = '12px';
+  financeAction.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+  financeAction.style.background = '#9be564';
+  financeAction.style.color = '#0b132b';
+  financeAction.style.cursor = 'pointer';
+  financeAction.style.fontWeight = '700';
+
+  financeAction.addEventListener('click', () => {
+    host.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: 'finance' },
+      bubbles: true,
+    }));
+  });
+
+  const educationAction = document.createElement('button');
+  educationAction.textContent = 'Ir para Educação';
+  educationAction.style.padding = '0.75rem 1.25rem';
+  educationAction.style.borderRadius = '12px';
+  educationAction.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+  educationAction.style.background = '#5bc0be';
+  educationAction.style.color = '#0b132b';
+  educationAction.style.cursor = 'pointer';
+  educationAction.style.fontWeight = '700';
+
+  educationAction.addEventListener('click', () => {
+    host.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: 'education' },
+      bubbles: true,
+    }));
+  });
+
+  actions.append(action, profileAction, financeAction, educationAction);
 
   container.append(title, summary, status, actions);
   host.replaceChildren(container);

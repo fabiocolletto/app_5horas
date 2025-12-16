@@ -11,3 +11,7 @@
 ## 2025-12-16
 - Etapa concluída: Etapa 3 — Célula Perfil
 - Resumo: Célula `sistema.perfil` criada com persistência simples em `localStorage`, manifesto atualizado e Genoma agora redireciona para cadastro quando não há perfil salvo.
+
+## 2025-12-16
+- Etapa concluída: Etapa 4 — Células Funcionais
+- Resumo: Manifesto atualizado com as células `finance` e `education`, navegação adicionada na home e novas telas com indicadores financeiros e trilhas de educação.

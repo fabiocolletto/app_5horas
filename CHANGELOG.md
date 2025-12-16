@@ -15,3 +15,7 @@
 ## 2025-12-16
 - Etapa concluída: Etapa 4 — Células Funcionais
 - Resumo: Manifesto atualizado com as células `finance` e `education`, navegação adicionada na home e novas telas com indicadores financeiros e trilhas de educação.
+
+## 2025-12-17
+- Etapa concluída: Etapa 5 — Estabilização
+- Resumo: Navegação validada com verificação de destino, status ativos e proteção contra recargas redundantes; carregamento de células agora sinaliza progresso e preserva conteúdo em caso de falha.

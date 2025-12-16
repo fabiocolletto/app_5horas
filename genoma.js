@@ -6,8 +6,11 @@ class Genoma {
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
 
+    this.defaultCell = 'sistema.welcome';
+
     this.registerNavigation();
     this.reportBootstrap();
+    this.loadDefaultCell();
   }
 
   registerNavigation() {
@@ -27,6 +30,13 @@ class Genoma {
       ? 'Manifesto vazio: nenhuma célula registrada.'
       : `Manifesto carregado com ${total} célula(s).`;
     this.updateStatus(message);
+  }
+
+  loadDefaultCell() {
+    const exists = this.manifest.some((entry) => entry.name === this.defaultCell);
+    if (exists) {
+      this.loadCell(this.defaultCell);
+    }
   }
 
   loadCell(name) {

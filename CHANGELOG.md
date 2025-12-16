@@ -7,3 +7,7 @@
 ## 2024-05-18
 - Etapa concluída: Etapa 2 — Células Base
 - Resumo: Manifesto atualizado com as células `sistema.welcome` e `home`, navegação por evento integrada e carregamento inicial configurado.
+
+## 2025-12-16
+- Etapa concluída: Etapa 3 — Célula Perfil
+- Resumo: Célula `sistema.perfil` criada com persistência simples em `localStorage`, manifesto atualizado e Genoma agora redireciona para cadastro quando não há perfil salvo.

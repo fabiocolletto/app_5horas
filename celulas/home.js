@@ -20,6 +20,11 @@ export function mount(host) {
   status.style.margin = '0';
   status.style.opacity = '0.85';
 
+  const actions = document.createElement('div');
+  actions.style.display = 'flex';
+  actions.style.gap = '0.75rem';
+  actions.style.flexWrap = 'wrap';
+
   const action = document.createElement('button');
   action.textContent = 'Voltar para welcome';
   action.style.padding = '0.75rem 1.25rem';
@@ -37,6 +42,25 @@ export function mount(host) {
     }));
   });
 
-  container.append(title, summary, status, action);
+  const profileAction = document.createElement('button');
+  profileAction.textContent = 'Editar perfil';
+  profileAction.style.padding = '0.75rem 1.25rem';
+  profileAction.style.borderRadius = '12px';
+  profileAction.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+  profileAction.style.background = '#5bc0be';
+  profileAction.style.color = '#0b132b';
+  profileAction.style.cursor = 'pointer';
+  profileAction.style.fontWeight = '700';
+
+  profileAction.addEventListener('click', () => {
+    host.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: 'sistema.perfil' },
+      bubbles: true,
+    }));
+  });
+
+  actions.append(action, profileAction);
+
+  container.append(title, summary, status, actions);
   host.replaceChildren(container);
 }

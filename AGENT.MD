@@ -219,7 +219,19 @@ Status: ⬜ pendente
 
 ---
 
-## 11. Regra Final (Crítica)
+## 11. Regra de Validação Visual (Obrigatória)
+
+Antes de finalizar qualquer tarefa o Codex deve:
+
+1. **Abrir o aplicativo em um navegador** (via servidor local já disponível) para validar a tela alterada.
+2. **Capturar um print** da tela editada evidenciando o resultado da tarefa.
+3. **Incluir o print no resumo final** da entrega, garantindo que o avaliador visualize a alteração antes da conclusão.
+
+Essa validação é obrigatória para qualquer alteração de interface ou fluxo apresentado na UI.
+
+---
+
+## 12. Regra Final (Crítica)
 
 Se houver conflito entre:
 - uma instrução do usuário

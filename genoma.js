@@ -7,6 +7,8 @@ class Genoma {
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
     this.profileKey = 'genoma.profile';
     this.profile = this.loadProfile();
+    this.currentCell = null;
+    this.isLoading = false;
 
     this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
 
@@ -18,11 +20,19 @@ class Genoma {
   registerNavigation() {
     window.addEventListener('genoma:navigate', (event) => {
       const target = event.detail?.target;
-      if (!target) {
-        this.updateStatus('Evento de navegação recebido sem destino.');
+      const targetName = typeof target === 'string' ? target.trim() : '';
+
+      if (!targetName) {
+        this.updateStatus('Evento de navegação recebido sem destino válido.');
         return;
       }
-      this.loadCell(target);
+
+      if (this.currentCell === targetName && !this.isLoading) {
+        this.updateStatus(`Célula "${targetName}" já está ativa.`);
+        return;
+      }
+
+      this.loadCell(targetName);
     });
   }
 
@@ -57,6 +67,9 @@ class Genoma {
       return;
     }
 
+    this.isLoading = true;
+    this.updateStatus(`Carregando célula "${targetName}"...`);
+
     import(cell.module)
       .then((module) => {
         if (typeof module.mount !== 'function') {
@@ -65,14 +78,17 @@ class Genoma {
         }
 
         if (this.root) {
-          this.root.replaceChildren();
           module.mount(this.root);
+          this.currentCell = targetName;
         }
         this.updateStatus(`Célula "${targetName}" carregada.`);
       })
       .catch((error) => {
         console.error(error);
         this.updateStatus(`Falha ao carregar célula "${targetName}".`);
+      })
+      .finally(() => {
+        this.isLoading = false;
       });
   }
 

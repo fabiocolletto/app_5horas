@@ -7,7 +7,7 @@ Este documento registra o andamento das etapas oficiais. Consulte o `CHANGELOG.m
 - [x] Etapa 2 — Células Base
 - [x] Etapa 3 — Célula Perfil
 - [x] Etapa 4 — Células Funcionais
-- [ ] Etapa 5 — Estabilização
+- [x] Etapa 5 — Estabilização
 
 ## Regras de Validação
 - Toda tarefa deve ser validada abrindo o app no navegador, capturando um print da tela alterada e incluindo essa evidência no resumo final.

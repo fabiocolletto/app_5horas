@@ -1,260 +1,203 @@
-# AGENT.MD — GENOMA v1.2
+# AGENT.MD — GENOMA v1.3
 
-Este arquivo define as **regras obrigatórias de atuação do Codex** no repositório do Genoma v1.2.
+Este arquivo define as **regras obrigatórias de atuação do Codex** para a **versão 1.3 do Genoma**, cujo objetivo exclusivo é a **Implantação 2 — Persistência Redundante**.
 
-O Codex deve atuar **exclusivamente como executor**, nunca como arquiteto.
+A v1.3 parte do pressuposto de que:
 
-Qualquer ação fora deste documento é considerada incorreta.
+* O Genoma v1.2 está **100% implantado e funcional**
+* Navegação, células, eventos e persistência local simples já existem
+* Não há refatoração estrutural do Genoma
 
----
-
-## 1. Papel do Codex
-
-O Codex deve:
-
-* executar tarefas explicitamente solicitadas
-* seguir rigorosamente a arquitetura definida
-* consultar este arquivo antes de qualquer modificação
-
-O Codex **não deve**:
-
-* tomar decisões arquiteturais
-* introduzir novas tecnologias
-* reinterpretar regras
-* migrar código legado
+O Codex atua **exclusivamente como executor**, nunca como arquiteto.
 
 ---
 
-## 2. Princípios Arquiteturais (Imutáveis)
+## 1. Objetivo Único da v1.3
 
-* O Genoma é um **orquestrador puro**
+Introduzir **continuidade de dados do usuário** de forma **robusta, simples e de baixa manutenção**, utilizando **persistência redundante local**, sem backend e sem login.
+
+Definição resumida:
+
+> Garantir que os dados locais do usuário **sobrevivam a perdas parciais de cache**, utilizando um **ID único gerado no cliente** e armazenado de forma redundante.
+
+---
+
+## 2. Princípios Herdados da v1.2 (Imutáveis)
+
+Todos os princípios abaixo **não podem ser alterados**:
+
+* Genoma é um **orquestrador puro**
 * Células são unidades isoladas
-* Navegação é centralizada no Genoma
-* Comunicação entre células e Genoma ocorre por eventos (`CustomEvent`)
-* O Genoma **não contém HTML de telas**
-* Células **não manipulam history ou URL**
+* Comunicação ocorre via eventos (`CustomEvent`)
+* Genoma não contém HTML de telas
 * Zero build
 * Zero framework SPA
+* Zero backend
 
 ---
 
-## 3. Tecnologias Permitidas
+## 3. Escopo Exato da v1.3
 
-Somente estas tecnologias podem ser usadas:
+### A v1.3 INCLUI
 
-* HTML, CSS e JavaScript nativos
-* ES Modules
-* Web Components (Custom Elements)
-* Lit (Google)
-* Material Web (Google)
-* History API
-* GitHub Pages
+* Geração de um **ID único aleatório no cliente**
+* Persistência redundante desse ID em:
 
-Qualquer outra tecnologia é proibida.
+  * `localStorage`
+  * `IndexedDB` (API nativa, sem bibliotecas)
+* Estratégia de recuperação cruzada (reidratação)
+* Associação dos dados locais existentes a esse ID
 
----
+### A v1.3 NÃO INCLUI
 
-## 4. Tecnologias Proibidas
-
-* React
-* Vue
-* Angular
-* Svelte
-* Bundlers (Webpack, Vite, etc.)
-* Transpilers
-* Server-side rendering
-* Frameworks CSS
+* Login
+* Conta de usuário
+* Backend
+* Fingerprinting
+* Uso de dados pessoais para geração de ID
+* Uso de segredos, salts ou hashes no front-end
 
 ---
 
-## 5. Estrutura Obrigatória do Repositório
+## 4. Regra Fundamental de Identidade
 
-O repositório deve manter exatamente esta estrutura base:
-
-```
-/
-├─ index.html            # Shell HTML mínimo
-├─ genoma.js             # Orquestrador central
-├─ cells.manifest.js     # Registro declarativo de células
-├─ agent.md              # Constituição do agente
-├─ CHANGELOG.md          # Histórico oficial de execução
-└─ celulas/
-
-
-```
-
-```
-/
-├─ index.html
-├─ genoma.js
-├─ cells.manifest.js
-├─ agent.md
-├─ CHANGELOG.md
-├─ core/
-├─ tools/
-└─ celulas/
-```
-
----
-
-## 6. Template Oficial de Célula Fixa (Obrigatório)
-
-Todas as células fixas devem seguir o **Template Oficial de Célula Fixa v1**.
-
-Nenhuma exceção é permitida.
-
----
-
-## 7. Modelo de Execução por Etapas
-
-A implantação do Genoma v1.2 ocorre por **etapas sequenciais e cumulativas**.
+> **Identidade técnica deve ser gerada, não derivada.**
 
 Regras obrigatórias:
 
-* O Codex deve executar **somente a próxima etapa não concluída**
-* O Codex deve verificar **agent.md e CHANGELOG.md antes de agir**
-* O Codex não pode iniciar uma etapa se a anterior não estiver marcada como concluída
-* Cada etapa deve resultar em **código funcional** sequenciais**.
-
-O Codex deve:
-
-* executar apenas a **próxima etapa pendente**
-* verificar o `CHANGELOG.md` antes de agir
-* nunca pular etapas
+* O ID deve ser gerado via API nativa segura (`crypto`)
+* O ID não pode conter dados pessoais
+* O ID não pode ser calculado a partir de telefone, e-mail ou qualquer PII
 
 ---
 
-## 8. Etapas Oficiais da Implantação
+## 5. Modelo de Execução por Etapas (v1.3)
 
-> **Importante:** Cada etapa só pode ser considerada concluída se o código estiver funcional e registrado no `CHANGELOG.md`.
+A Implantação 2 ocorre por **etapas sequenciais e auditáveis**.
 
-### Etapa 1 — Bootstrap do Repositório
+Regras:
 
-* Criar estrutura inicial
-* Criar `index.html`
-* Criar `genoma.js`
-* Criar `cells.manifest.js`
-* Criar `agent.md`
-* Criar `CHANGELOG.md`
+* Executar apenas a próxima etapa pendente
+* Cada etapa deve resultar em código funcional
+* Cada conclusão deve ser registrada no `CHANGELOG.md`
+
+---
+
+## 6. Etapas Oficiais da v1.3 — Persistência Redundante
+
+### Etapa 6.1 — Geração do Device ID
+
+Objetivo:
+
+* Gerar um **ID único e estável por dispositivo**
+
+Requisitos:
+
+* Usar `crypto.randomUUID()`
+* Gerar apenas uma vez
+* Não regenerar se já existir
 
 Status: ⬜ pendente
 
 ---
 
-### Etapa 2 — Células Base
+### Etapa 6.2 — Persistência Redundante do ID
 
-* Criar célula `sistema.welcome`
-* Criar célula `home`
-* Integrar navegação por evento
+Objetivo:
 
-Status: ⬜ pendente
+* Persistir o mesmo `deviceId` em múltiplos storages
 
----
+Requisitos:
 
-### Etapa 3 — Célula Perfil
-
-* Criar célula `sistema.perfil`
-* Implementar gate de perfil no Genoma
-* Implementar **persistência inicial via LocalStorage simples**
-
-  * Uso exclusivo de `window.localStorage`
-  * Chave única e explícita (ex: `genoma.profile`)
-  * Estrutura de dados mínima (ex: nome, papel)
-  * Nenhuma abstração, wrapper ou biblioteca adicional
+* Salvar em `localStorage`
+* Salvar em `IndexedDB`
+* Sem abstrações
+* Sem bibliotecas externas
 
 Status: ⬜ pendente
 
 ---
 
-### Etapa 4 — Células Funcionais
+### Etapa 6.3 — Reidratação Cruzada
 
-* Criar célula `finance`
-* Criar célula `education`
+Objetivo:
+
+* Recuperar o `deviceId` caso um storage seja perdido
+
+Requisitos:
+
+* Na inicialização:
+
+  * tentar `localStorage`
+  * se falhar, tentar `IndexedDB`
+* Se encontrado em apenas um local:
+
+  * reidratar o outro
 
 Status: ⬜ pendente
 
 ---
 
-### Etapa 5 — Estabilização
+### Etapa 6.4 — Associação dos Dados Locais Existentes
 
-* Revisão de navegação
-* Revisão de eventos
-* Revisão de carregamento de células
+Objetivo:
+
+* Associar dados já salvos ao `deviceId`
+
+Requisitos:
+
+* Manter compatibilidade com dados da v1.2
+* Estrutura clara de chaves (ex: `genoma:{deviceId}:profile`)
+* Nenhuma migração destrutiva
 
 Status: ⬜ pendente
 
 ---
 
-## 9. CHANGELOG (Fonte de Verdade)
+### Etapa 6.5 — Validação e Estabilização
 
-* O arquivo `CHANGELOG.md` é a **fonte de verdade do progresso**
-* Cada entrada deve conter:
+Objetivo:
 
-  * data
-  * etapa concluída
-  * resumo objetivo do que foi feito
-* Ao concluir uma etapa, o Codex deve:
+* Garantir previsibilidade e baixo custo de manutenção
 
-  * marcar a etapa como concluída no `agent.md`
-  * registrar a conclusão no `CHANGELOG.md` é a **fonte de verdade do progresso**
-* Ao concluir uma etapa, o Codex deve:
+Requisitos:
 
-  * marcar a etapa como concluída no `agent.md`
-  * registrar a mudança no `CHANGELOG.md`
+* Testar limpeza parcial de cache
+* Verificar reidratação correta
+* Garantir ausência de erros silenciosos
+
+Status: ⬜ pendente
 
 ---
 
-## 10. Regras de Commit
+## 7. CHANGELOG (Fonte de Verdade)
 
-* Um commit por etapa ou subtarefa
-* Commits claros e objetivos
-* Não misturar etapas no mesmo commit
-* Mensagens devem seguir padrão:
-
-````
-<tipo>: etapa X — descrição curta
-``` por etapa ou subtarefa
-- Commits claros e objetivos
-- Nunca misturar etapas no mesmo commit
+* Cada etapa concluída deve ser registrada
+* Registro deve conter data, etapa e resumo objetivo
+* O Codex deve consultar o `CHANGELOG.md` antes de avançar
 
 ---
 
-## 11. Regra de Validação Visual (Obrigatória)
+## 8. Regras de Commit (v1.3)
 
-Antes de finalizar qualquer tarefa o Codex deve:
+* Um commit por etapa
+* Commits claros e reversíveis
+* Padrão obrigatório:
 
-1. **Abrir o aplicativo em um navegador** (via servidor local já disponível) para validar a tela alterada.
-2. **Capturar um print** da tela editada evidenciando o resultado da tarefa.
-3. **Incluir o print no resumo final** da entrega, garantindo que o avaliador visualize a alteração antes da conclusão.
-
-Essa validação é obrigatória para qualquer alteração de interface ou fluxo apresentado na UI.
+```
+feat(v1.3): etapa 6.x — descrição curta
+```
 
 ---
 
-## 12. Regra Final (Crítica)
+## 9. Regra Final (Crítica)
 
 Se houver conflito entre:
-- uma instrução do usuário
-- este `agent.md`
-- o estado registrado no `CHANGELOG.md`
 
-O Codex deve **parar e pedir orientação**, nunca assumir.
+* instrução do usuário
+* este `agent.md`
+* o `CHANGELOG.md`
 
-Este arquivo é a **constituição viva do Genoma v1.2** e deve ser seguido literalmente.
+O Codex deve **parar e pedir orientação**.
 
----
-
-## 12. Módulos Herdados do v1 (Uso Opcional)
-
-Nenhum módulo herdado do v1 deve existir no Genoma v1.2.
-
-### Diretriz Final
-
-- `fetchWithFallback.js` **NÃO deve ser incluído** no repositório inicial
-- Fallback de carregamento **não é requisito** da arquitetura v1.2
-- Falhas de carregamento devem ser explícitas e visíveis
-
-Regra:
-> Código defensivo sem uso real é considerado dívida técnica e não deve existir no repositório.
-
-````
+Este arquivo define **onde a v1.3 deve chegar** e **como ela deve ser implantada**, sem margem para interpretações criativas.

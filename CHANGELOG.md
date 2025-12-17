@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-18
+- chore(v1.2.1): consolidação da base antes da persistência redundante
+- chore: preparação do repositório para Genoma v1.3 (persistência redundante)
+
 ## 2024-05-17
 - Etapa concluída: Etapa 1 — Bootstrap do Repositório
 - Resumo: Estrutura inicial criada com shell HTML, orquestrador Genoma, manifesto de células e diretórios base (`core/`, `tools/`, `celulas/`).

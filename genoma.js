@@ -8,30 +8,37 @@ class Genoma {
     this.profileKey = 'genoma.profile';
     this.deviceIdKey = 'genoma.deviceId';
     this.deviceId = null;
+    this.indexedDbName = 'genoma';
+    this.indexedDbStore = 'genomaStore';
+    this.indexedDbInstance = null;
     this.profile = this.loadProfile();
     this.currentCell = null;
     this.isLoading = false;
 
     this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
 
-    this.ensureDeviceIdentity();
+    this.ensureDeviceIdentity().catch((error) => {
+      console.error('Falha ao garantir a identidade do dispositivo.', error);
+      this.updateStatus('Falha ao inicializar a identidade do dispositivo.');
+    });
     this.registerNavigation();
     this.reportBootstrap();
     this.loadDefaultCell();
   }
 
-  ensureDeviceIdentity() {
+  async ensureDeviceIdentity() {
     const existing = this.readDeviceId();
 
     if (existing) {
       this.deviceId = existing;
       this.updateStatus('Identidade do dispositivo carregada.');
+      await this.persistDeviceId(existing);
       return;
     }
 
     const generated = crypto.randomUUID();
-    window.localStorage.setItem(this.deviceIdKey, generated);
     this.deviceId = generated;
+    await this.persistDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
   }
 
@@ -43,6 +50,56 @@ class Genoma {
     }
 
     return null;
+  }
+
+  async persistDeviceId(deviceId) {
+    window.localStorage.setItem(this.deviceIdKey, deviceId);
+
+    try {
+      await this.saveDeviceIdToIndexedDb(deviceId);
+    } catch (error) {
+      console.error('Falha ao salvar deviceId no IndexedDB.', error);
+    }
+  }
+
+  async saveDeviceIdToIndexedDb(deviceId) {
+    const db = await this.openIndexedDb();
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(this.indexedDbStore, 'readwrite');
+      const store = transaction.objectStore(this.indexedDbStore);
+      const request = store.put(deviceId, this.deviceIdKey);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  openIndexedDb() {
+    if (this.indexedDbInstance) {
+      return Promise.resolve(this.indexedDbInstance);
+    }
+
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.indexedDbName, 1);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+
+        if (!db.objectStoreNames.contains(this.indexedDbStore)) {
+          db.createObjectStore(this.indexedDbStore);
+        }
+      };
+
+      request.onsuccess = () => {
+        this.indexedDbInstance = request.result;
+        resolve(this.indexedDbInstance);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
   }
 
   registerNavigation() {

@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-19
+- Etapa concluída: Etapa 6.2 — Persistência Redundante do Device ID
+- Resumo: O deviceId agora é persistido simultaneamente no localStorage e no IndexedDB nativo, garantindo redundância sem dependências externas.
+
 ## 2025-12-17
 - Etapa concluída: Etapa 6.1 — Geração do Device ID
 - Resumo: Device ID gerado uma única vez via `crypto.randomUUID()` e armazenado em `localStorage` para permanecer estável entre recargas, sem regeneração quando já existir.

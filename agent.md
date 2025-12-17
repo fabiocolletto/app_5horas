@@ -195,3 +195,11 @@ Se houver conflito entre:
 - o `CHANGELOG.md`
 
 O Codex deve **parar e pedir orientação**.
+
+---
+
+## 13. Instruções de teste para o ambiente Codex (obrigatórias quando testes forem necessários)
+- Inicie o app no contêiner principal expondo a porta (`npm run dev -- --host --port 4173` ou comando equivalente) e confirme que está escutando.
+- Só dispare o `browser_container.run_playwright_script` após o servidor estar ativo e sempre encaminhe a porta no parâmetro `ports_to_forward`.
+- Use o Playwright para abrir a página, coletar logs de `localStorage`/`IndexedDB` e capturar screenshot como evidência.
+- Se o servidor não puder ser acessado pelo navegador (ex.: `ERR_CONNECTION_REFUSED`), registre a limitação no resumo, ajuste a porta e retente apenas após corrigir o problema.

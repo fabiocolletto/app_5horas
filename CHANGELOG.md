@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-17
+- Etapa concluída: Etapa 6.1 — Geração do Device ID
+- Resumo: Device ID gerado uma única vez via `crypto.randomUUID()` e armazenado em `localStorage` para permanecer estável entre recargas, sem regeneração quando já existir.
+
 ## 2025-12-18
 - chore(v1.2.1): consolidação da base antes da persistência redundante
 - chore: preparação do repositório para Genoma v1.3 (persistência redundante)

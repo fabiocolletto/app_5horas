@@ -6,15 +6,43 @@ class Genoma {
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
     this.profileKey = 'genoma.profile';
+    this.deviceIdKey = 'genoma.deviceId';
+    this.deviceId = null;
     this.profile = this.loadProfile();
     this.currentCell = null;
     this.isLoading = false;
 
     this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
 
+    this.ensureDeviceIdentity();
     this.registerNavigation();
     this.reportBootstrap();
     this.loadDefaultCell();
+  }
+
+  ensureDeviceIdentity() {
+    const existing = this.readDeviceId();
+
+    if (existing) {
+      this.deviceId = existing;
+      this.updateStatus('Identidade do dispositivo carregada.');
+      return;
+    }
+
+    const generated = crypto.randomUUID();
+    window.localStorage.setItem(this.deviceIdKey, generated);
+    this.deviceId = generated;
+    this.updateStatus('Identidade do dispositivo gerada.');
+  }
+
+  readDeviceId() {
+    const stored = window.localStorage.getItem(this.deviceIdKey);
+
+    if (typeof stored === 'string' && stored.trim().length > 0) {
+      return stored;
+    }
+
+    return null;
   }
 
   registerNavigation() {

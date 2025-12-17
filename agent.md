@@ -86,7 +86,7 @@ Requisitos:
 - Gerar apenas uma vez
 - Não regenerar se já existir
 
-Status: ⬜ pendente
+Status: ✅ concluída em 2025-12-17 — ID gerado via `crypto.randomUUID()` e salvo no `localStorage` para persistir entre recargas.
 
 ### Etapa 6.2 — Persistência Redundante do ID
 Objetivo:
@@ -140,7 +140,46 @@ Status: ⬜ pendente
 - Registro deve conter data, etapa e resumo objetivo
 - O Codex deve consultar o `CHANGELOG.md` antes de avançar
 
-## 8. Regras de Commit (v1.3)
+## 8. Testes obrigatórios por etapa (executar **após** implementar cada etapa 6.x)
+- Adicione os testes abaixo imediatamente após concluir a ação de código da etapa correspondente.
+- Qualquer falha bloqueia a conclusão da etapa e impede o commit.
+
+### Etapa 6.1 — Verificação de geração única
+- Confirmar geração via `crypto.randomUUID()`.
+- Recarregar a página e garantir que o `deviceId` não muda.
+
+### Etapa 6.2 — Persistência redundante
+- Após gerar o ID, inspecionar `localStorage` e `IndexedDB` para confirmar que o mesmo valor está salvo em ambos (chave `genomaDeviceId` ou equivalente definida na implementação).
+
+### Etapa 6.3 — Reidratação cruzada
+- Limpar apenas o `localStorage`, recarregar e verificar que o ID é reidratado a partir do `IndexedDB`.
+- Repetir limpando apenas o `IndexedDB` e reidratando a partir do `localStorage`.
+
+### Etapa 6.4 — Dados legados
+- Confirmar que dados v1.2 permanecem acessíveis e passam a ser referenciados pelo novo ID (ex.: chaves `genoma:{deviceId}:...`).
+
+### Etapa 6.5 — Estabilização
+- Testar limpeza parcial de cache, reidratação correta e ausência de erros silenciosos após a consolidação das etapas anteriores.
+
+## 9. Registro, evidências e checklist pós-ação (obrigatórios antes de marcar a etapa como concluída)
+- Criar evidências logo após executar os testes de cada etapa:
+  - Screenshot do app exibindo o estado pós-teste.
+  - Log documentando o conteúdo de `localStorage` e `IndexedDB` com o `deviceId` presente.
+- Atualizar o `CHANGELOG.md` com data, etapa (6.x) e resumo objetivo do resultado.
+- Seguir o checklist antes de encerrar a etapa:
+  - Executar todos os testes obrigatórios da seção 8.
+  - Registrar evidências (screenshot + logs de storage).
+  - Atualizar o `CHANGELOG.md`.
+  - Somente então realizar o commit único da etapa.
+
+## 10. Condições de aceite por etapa
+- 6.1: ID único gerado uma única vez e reutilizado em recargas.
+- 6.2: ID idêntico salvo em `localStorage` e `IndexedDB`.
+- 6.3: Reidratação automática quando um storage é apagado e validação do preenchimento cruzado.
+- 6.4: Dados legados intactos e referenciados pelo novo ID.
+- 6.5: Fluxo completo tolerante a limpezas parciais de cache, sem erros silenciosos.
+
+## 11. Regras de Commit (v1.3)
 - Um commit por etapa
 - Commits claros e reversíveis
 - Padrão obrigatório:
@@ -149,7 +188,7 @@ Status: ⬜ pendente
 feat(v1.3): etapa 6.x — descrição curta
 ```
 
-## 9. Regra Final (Crítica)
+## 12. Regra Final (Crítica)
 Se houver conflito entre:
 - instrução do usuário
 - este `agent.md`

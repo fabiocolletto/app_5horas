@@ -1,5 +1,8 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-20
+- feat(células): feedback visual ao salvar perfil, cobrindo sucesso, alerta de campos vazios e erro de persistência
+
 ## 2025-12-19
 - feat(core): introdução de `core/storage` com Dexie e migração do legado em `localStorage`
 - feat(core): criação de `core/state` para persistir célula ativa, última célula e preferências

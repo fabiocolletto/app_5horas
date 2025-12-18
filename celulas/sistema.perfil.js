@@ -23,7 +23,7 @@ function createButton(label, background, color = '#0b132b') {
 export const cell = {
   id: 'sistema.perfil',
   name: 'Perfil do Genoma',
-  version: '1.3.2',
+  version: '1.4.0',
   init(context) {
     const container = document.createElement('section');
     container.style.display = 'grid';

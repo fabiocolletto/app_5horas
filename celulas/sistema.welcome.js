@@ -10,13 +10,13 @@ function styleContainer(container) {
 export const cell = {
   id: 'sistema.welcome',
   name: 'Boas-vindas',
-  version: '1.3.1',
+  version: '1.4.0',
   init(context) {
     const container = document.createElement('section');
     styleContainer(container);
 
     const title = document.createElement('h1');
-    title.textContent = 'Bem-vindo ao Genoma v1.3';
+    title.textContent = 'Bem-vindo ao Genoma v1.4';
     title.style.margin = '0';
 
     const description = document.createElement('p');

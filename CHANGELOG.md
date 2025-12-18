@@ -1,4 +1,9 @@
-# CHANGELOG — Genoma v1.3
+# CHANGELOG — App 5Horas v1.4
+
+## 2025-12-22
+- Etapa concluída: Etapa 1.3.4 — Consolidação e Selo de Plataforma
+- Resumo: Versão oficial `appVersion` 1.4.0 registrada em `core/app.meta.js`, manifesto validado para permitir novas células sem tocar no genoma, documentação alinhada (README, agent.md, CHANGELOG) e células atualizadas para o marco 1.4.
+- Validação: checklist visual do `index.html` executado manualmente (cabeçalho 1.4, navegação entre células e painéis) com resultado satisfatório.
 
 ## 2025-12-21
 - Etapa concluída: Etapa 1.3.3 — Observabilidade e Eventos

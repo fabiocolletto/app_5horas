@@ -1,4 +1,4 @@
-// Manifesto declarativo de células do Genoma v1.3
+// Manifesto declarativo de células do Genoma v1.4
 // Cada entrada segue o formato: { id: 'celula.nome', module: './celulas/arquivo.js' }
 
 export const cellsManifest = [

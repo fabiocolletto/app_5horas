@@ -1,4 +1,9 @@
 import { cellsManifest } from './cells.manifest.js';
+import {
+  DEVICE_ID_KEY,
+  associateLegacyProfileWithDevice,
+  readProfileFromStorage,
+} from './core/storage.js';
 
 class Genoma {
   constructor() {
@@ -6,7 +11,7 @@ class Genoma {
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
     this.profileKey = 'genoma.profile';
-    this.deviceIdKey = 'genoma.deviceId';
+    this.deviceIdKey = DEVICE_ID_KEY;
     this.deviceId = null;
     this.indexedDbName = 'genoma';
     this.indexedDbStore = 'genomaStore';
@@ -41,6 +46,7 @@ class Genoma {
       }
 
       await this.persistDeviceId(existing);
+      this.associateLocalDataWithDevice();
       return;
     }
 
@@ -48,6 +54,7 @@ class Genoma {
     this.deviceId = generated;
     await this.persistDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
+    this.associateLocalDataWithDevice();
   }
 
   readDeviceIdFromLocalStorage() {
@@ -220,23 +227,20 @@ class Genoma {
   }
 
   loadProfile() {
-    const raw = window.localStorage.getItem(this.profileKey);
+    return readProfileFromStorage(this.deviceId);
+  }
 
-    if (!raw) {
-      return null;
+  associateLocalDataWithDevice() {
+    if (!this.deviceId) {
+      return;
     }
 
-    try {
-      const profile = JSON.parse(raw);
+    const associatedProfile = associateLegacyProfileWithDevice(this.deviceId);
 
-      if (typeof profile?.nome === 'string' && typeof profile?.papel === 'string') {
-        return profile;
-      }
-    } catch (error) {
-      console.warn('Falha ao ler perfil armazenado.', error);
+    if (associatedProfile && !this.profile) {
+      this.profile = associatedProfile;
+      this.defaultCell = 'home';
     }
-
-    return null;
   }
 }
 

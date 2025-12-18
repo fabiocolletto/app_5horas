@@ -1,27 +1,25 @@
-const STORAGE_KEY = 'genoma.profile';
+import {
+  getStoredDeviceId,
+  persistProfileToStorage,
+  readProfileFromStorage,
+} from '../core/storage.js';
+
+function resolveDeviceId() {
+  return getStoredDeviceId();
+}
 
 function readProfile() {
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const stored = readProfileFromStorage(resolveDeviceId());
 
-  if (!raw) {
+  if (!stored) {
     return { nome: '', papel: '' };
   }
 
-  try {
-    const data = JSON.parse(raw);
-
-    return {
-      nome: typeof data?.nome === 'string' ? data.nome : '',
-      papel: typeof data?.papel === 'string' ? data.papel : '',
-    };
-  } catch (error) {
-    console.warn('Perfil inválido no storage.', error);
-    return { nome: '', papel: '' };
-  }
+  return stored;
 }
 
 function persistProfile(nome, papel) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, papel }));
+  persistProfileToStorage(resolveDeviceId(), nome, papel);
 }
 
 export function mount(host) {

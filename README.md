@@ -88,6 +88,18 @@ O arquivo `cells.manifest.js` funciona como:
 * Contrato entre o genoma e as células
 * Ponto único de controle de carregamento
 
+### Contrato Mínimo de Célula (Etapa 1.3.1)
+
+A partir da versão **1.3.1** cada célula precisa seguir um contrato explícito para ser carregada pelo Genoma:
+
+* `id`: identificador único da célula
+* `name`: nome legível para diagnósticos
+* `version`: versão da célula para rastreabilidade
+* `init(context)`: inicializa a célula recebendo um contexto com `host`, `navigate`, `profile` e `deviceId`
+* `destroy()`: libera recursos e listeners antes de trocar de célula
+
+O Genoma valida essas propriedades antes de ativar qualquer módulo. Células que não atendem ao contrato são rejeitadas e o status exibe o motivo.
+
 ---
 
 ## Como Rodar Localmente

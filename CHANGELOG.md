@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-22
+- Etapa concluída: Etapa 6.5 — Validação e Estabilização
+- Resumo: Inicialização do Genoma agora aguarda a validação completa da identidade, com reidratação automática após inconsistências entre storages e feedback explícito sobre falhas no IndexedDB, garantindo comportamento previsível após limpezas parciais de cache.
+
 ## 2025-12-21
 - Etapa concluída: Etapa 6.4 — Associação dos Dados Locais Existentes
 - Resumo: Dados legados agora são associados ao deviceId com chaves nomeadas (`genoma:{deviceId}:...`), preservando compatibilidade com a estrutura da v1.2 e garantindo que o perfil seja referenciado pelo identificador do dispositivo.

@@ -1,4 +1,6 @@
 import { cellsManifest } from './cells.manifest.js';
+import { events, EVENT_TYPES } from './core/events.js';
+import { logger } from './core/logger.js';
 import { state } from './core/state.js';
 
 class Genoma {
@@ -6,6 +8,8 @@ class Genoma {
     this.root = document.getElementById('genoma-root');
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
+    this.events = events;
+    this.logger = logger;
     this.state = state;
     this.deviceId = this.state.getDeviceId();
     this.profile = this.state.getProfile();
@@ -17,6 +21,7 @@ class Genoma {
     this.defaultCell = restoredCell || (this.profile ? 'home' : 'sistema.perfil');
 
     this.ensureDeviceIdentity();
+    this.reportDebugMode();
     this.registerNavigation();
     this.reportBootstrap();
     this.loadDefaultCell();
@@ -35,6 +40,12 @@ class Genoma {
     this.deviceId = generated;
     this.state.setDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
+  }
+
+  reportDebugMode() {
+    if (this.logger.isDebugEnabled()) {
+      this.updateStatus('Modo debug ativado.');
+    }
   }
 
   registerNavigation() {
@@ -62,6 +73,7 @@ class Genoma {
       ? 'Manifesto vazio: nenhuma célula registrada.'
       : `Manifesto carregado com ${total} célula(s).`;
     this.updateStatus(message);
+    this.logger.debug('Manifesto analisado.', { total });
   }
 
   loadDefaultCell() {
@@ -99,10 +111,13 @@ class Genoma {
       return;
     }
 
+    this.events.emit(EVENT_TYPES.CELL_DESTROY, { id: this.currentCellId });
+    this.logger.debug(`Destruindo célula "${this.currentCellId}".`);
+
     try {
       this.currentCell.destroy();
     } catch (error) {
-      console.warn(`Falha ao destruir célula "${this.currentCellId}".`, error);
+      this.handleCellError(this.currentCellId, error, 'destroy');
     }
 
     if (this.root) {
@@ -123,6 +138,7 @@ class Genoma {
       updateProfile: (data) => this.setProfile(data),
       updatePreferences: (patch) => this.state.updatePreferences(patch),
       navigate: (destination) => this.navigate(destination, targetId),
+      events: this.events,
     };
   }
 
@@ -162,6 +178,7 @@ class Genoma {
 
     this.isLoading = true;
     this.updateStatus(`Carregando célula "${chosenId}"...`);
+    this.events.emit(EVENT_TYPES.CELL_LOAD, { id: chosenId, origin: this.currentCellId });
 
     import(cellEntry.module)
       .then((module) => {
@@ -169,33 +186,46 @@ class Genoma {
         const contractIssue = this.validateCellContract(candidate);
 
         if (contractIssue) {
-          this.updateStatus(`Contrato inválido para "${chosenId}": ${contractIssue}`);
+          this.handleCellError(chosenId, new Error(contractIssue), 'contract');
           return;
         }
 
         this.teardownCurrentCell();
 
         const context = this.createContext(chosenId);
-        candidate.init(context);
-        this.currentCell = candidate;
-        this.currentCellId = chosenId;
+        this.events.emit(EVENT_TYPES.CELL_INIT, { id: chosenId, name: candidate.name, version: candidate.version });
 
-        this.state.setActiveCell(chosenId);
-        this.updateStatus(`Célula "${candidate.name}" (v${candidate.version}) carregada.`);
+        try {
+          candidate.init(context);
+          this.currentCell = candidate;
+          this.currentCellId = chosenId;
+          this.state.setActiveCell(chosenId);
+          this.events.emit(EVENT_TYPES.CELL_READY, { id: chosenId, name: candidate.name, version: candidate.version });
+          this.updateStatus(`Célula "${candidate.name}" (v${candidate.version}) carregada.`);
+        } catch (error) {
+          this.handleCellError(chosenId, error, 'init');
+        }
       })
       .catch((error) => {
-        console.error(error);
-        this.updateStatus(`Falha ao carregar célula "${chosenId}".`);
+        this.handleCellError(chosenId, error, 'load');
       })
       .finally(() => {
         this.isLoading = false;
       });
   }
 
+  handleCellError(cellId, error, stage) {
+    this.events.emit(EVENT_TYPES.CELL_ERROR, { id: cellId, stage, error });
+    this.logger.error(`Erro na célula "${cellId}" durante ${stage ?? 'execução'}.`, error);
+    this.updateStatus(`Falha ao processar célula "${cellId}" na etapa "${stage || 'execução'}".`);
+  }
+
   updateStatus(message) {
     if (this.status) {
       this.status.textContent = message;
     }
+
+    this.logger.info(message);
   }
 
   setProfile(profile) {

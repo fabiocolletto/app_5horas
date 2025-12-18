@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.3
 
+## 2025-12-21
+- Etapa concluída: Etapa 1.3.3 — Observabilidade e Eventos
+- Resumo: Adicionado hub central de eventos do genoma (`cell:load`, `cell:init`, `cell:ready`, `cell:error`, `cell:destroy`), logger do core com modo debug ativável por flag e tratamento explícito para falhas de carga, contrato, inicialização ou destruição de células.
+
 ## 2025-12-20
 - Etapa concluída: Etapa 1.3.2 — Estado Global e Persistência
 - Resumo: Criados módulos `core/state` e `core/storage` para persistir célula ativa, última célula e preferências; Genoma e célula de perfil passaram a usar o estado central, eliminando acessos diretos a `localStorage` pelas células.

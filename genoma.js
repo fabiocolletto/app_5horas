@@ -27,11 +27,19 @@ class Genoma {
   }
 
   async ensureDeviceIdentity() {
-    const existing = this.readDeviceId();
+    const localId = this.readDeviceIdFromLocalStorage();
+    const indexedId = await this.readDeviceIdFromIndexedDb();
+    const existing = localId || indexedId;
 
     if (existing) {
       this.deviceId = existing;
-      this.updateStatus('Identidade do dispositivo carregada.');
+
+      if (!localId || !indexedId || localId !== indexedId) {
+        this.updateStatus('Identidade do dispositivo reidratada.');
+      } else {
+        this.updateStatus('Identidade do dispositivo carregada.');
+      }
+
       await this.persistDeviceId(existing);
       return;
     }
@@ -42,7 +50,7 @@ class Genoma {
     this.updateStatus('Identidade do dispositivo gerada.');
   }
 
-  readDeviceId() {
+  readDeviceIdFromLocalStorage() {
     const stored = window.localStorage.getItem(this.deviceIdKey);
 
     if (typeof stored === 'string' && stored.trim().length > 0) {
@@ -50,6 +58,34 @@ class Genoma {
     }
 
     return null;
+  }
+
+  async readDeviceIdFromIndexedDb() {
+    try {
+      const db = await this.openIndexedDb();
+
+      return await new Promise((resolve, reject) => {
+        const transaction = db.transaction(this.indexedDbStore, 'readonly');
+        const store = transaction.objectStore(this.indexedDbStore);
+        const request = store.get(this.deviceIdKey);
+
+        request.onsuccess = () => {
+          const value = request.result;
+
+          if (typeof value === 'string' && value.trim().length > 0) {
+            resolve(value);
+            return;
+          }
+
+          resolve(null);
+        };
+
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Falha ao ler deviceId do IndexedDB.', error);
+      return null;
+    }
   }
 
   async persistDeviceId(deviceId) {

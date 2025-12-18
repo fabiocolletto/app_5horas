@@ -6,8 +6,26 @@
   <title>Genoma</title>
   <style>
     :root {
-      color-scheme: light dark;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color-scheme: dark;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --bg-900: #050814;
+      --bg-800: #0b132b;
+      --bg-700: #111b3f;
+      --surface-1: rgba(255, 255, 255, 0.04);
+      --surface-2: rgba(255, 255, 255, 0.06);
+      --surface-3: rgba(255, 255, 255, 0.08);
+      --text-primary: #e8edf5;
+      --text-secondary: #b6c2e0;
+      --accent-1: #5bc0be;
+      --accent-2: #9be564;
+      --accent-3: #f7b267;
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow-soft: 0 10px 35px rgba(0, 0, 0, 0.3);
+      --shadow-strong: 0 18px 55px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -15,30 +33,41 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: #0b132b;
-      color: #e0e6ed;
+      background: radial-gradient(circle at 10% 20%, rgba(91, 192, 190, 0.1), transparent 25%),
+        radial-gradient(circle at 80% 0%, rgba(155, 229, 100, 0.12), transparent 22%),
+        linear-gradient(160deg, var(--bg-900), var(--bg-800));
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
     }
 
     header {
       padding: 1rem 1.5rem;
-      background: #1c2541;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(90deg, var(--bg-800), var(--bg-700));
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
     }
 
     .branding {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.25rem;
     }
 
     #genoma-title {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.01em;
+      margin: 0;
     }
 
     #genoma-milestone {
-      color: #9be564;
-      font-weight: 600;
+      color: var(--accent-2);
+      font-weight: 700;
       font-size: 0.95rem;
+      letter-spacing: 0.02em;
     }
 
     main {
@@ -47,13 +76,220 @@
       flex-direction: column;
       padding: 1.5rem;
       gap: 1rem;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    #genoma-root {
+      display: grid;
+      gap: 1rem;
     }
 
     .status {
-      padding: 1rem;
-      border: 1px dashed rgba(255, 255, 255, 0.3);
+      padding: 1rem 1.25rem;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: var(--surface-1);
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .status strong {
+      color: var(--text-primary);
+    }
+
+    .cell-surface {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      padding: 1.5rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.75rem;
+      color: var(--accent-1);
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+      color: var(--text-primary);
+      background: var(--surface-1);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-1), #3cc0a8);
+      color: #04121d;
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn-secondary {
+      background: var(--surface-3);
+      color: var(--text-primary);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: var(--surface-3);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: var(--border);
+      margin: 0.65rem 0;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .modal-backdrop.is-visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: min(520px, 100%);
+      padding: 1.25rem 1.35rem;
+      box-shadow: var(--shadow-strong);
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .modal header {
+      background: transparent;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      position: static;
+    }
+
+    .modal h2 {
+      margin: 0;
+    }
+
+    .input-row {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .input-row label {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .input-row input {
+      padding: 0.8rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-3);
+      color: var(--text-primary);
+    }
+
+    .input-row input:focus {
+      outline: 2px solid rgba(91, 192, 190, 0.5);
+      border-color: var(--accent-1);
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface-3);
+      border-radius: 12px;
+      padding: 0.65rem 0.8rem;
+      display: grid;
+      gap: 0.25rem;
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-1);
+      box-shadow: var(--shadow-soft);
     }
   </style>
 </head>

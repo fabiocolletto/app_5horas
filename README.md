@@ -34,6 +34,7 @@ O app agora possui:
 * Versão consolidada **1.4.0** definida em `core/app.meta.js`
 * Genoma com validação de manifesto, contrato celular e observabilidade central
 * Estado global persistente (perfil, preferências, célula ativa e último acesso)
+* Fluxo obrigatório de cadastro: sem perfil salvo, o genoma inicia e bloqueia a navegação até concluir `sistema.perfil`
 * Pelo menos **3 células reais** funcionais e independentes (`home`, `finance`, `education`), além das células sistêmicas (`sistema.welcome`, `sistema.perfil`) e do modelo canônico
 * Documentação alinhada entre README, `agent.md` e `CHANGELOG.md`
 

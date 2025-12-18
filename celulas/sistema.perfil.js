@@ -95,6 +95,42 @@ export function mount(host) {
   const feedback = document.createElement('p');
   feedback.style.margin = '0';
   feedback.style.opacity = '0.9';
+  feedback.style.padding = '0.75rem';
+  feedback.style.borderRadius = '12px';
+  feedback.style.display = 'none';
+
+  function showFeedback(type, message) {
+    feedback.textContent = message;
+    feedback.style.display = 'block';
+
+    const styles = {
+      success: {
+        background: 'rgba(155, 229, 100, 0.12)',
+        color: '#c2ff9d',
+        border: '1px solid rgba(155, 229, 100, 0.45)',
+      },
+      warning: {
+        background: 'rgba(247, 178, 103, 0.12)',
+        color: '#f7b267',
+        border: '1px solid rgba(247, 178, 103, 0.45)',
+      },
+      error: {
+        background: 'rgba(244, 93, 72, 0.12)',
+        color: '#ffb3b3',
+        border: '1px solid rgba(244, 93, 72, 0.45)',
+      },
+      info: {
+        background: 'rgba(91, 192, 190, 0.12)',
+        color: '#d8ffff',
+        border: '1px solid rgba(91, 192, 190, 0.35)',
+      },
+    };
+
+    const palette = styles[type] ?? styles.info;
+    feedback.style.background = palette.background;
+    feedback.style.color = palette.color;
+    feedback.style.border = palette.border;
+  }
 
   readProfile()
     .then((stored) => {
@@ -113,19 +149,31 @@ export function mount(host) {
     const papel = roleInput.value.trim();
 
     if (!nome || !papel) {
-      feedback.textContent = 'Informe nome e papel para continuar.';
-      feedback.style.color = '#f7b267';
+      showFeedback('warning', 'Informe nome e papel para continuar.');
       return;
     }
 
-    await saveProfile({ nome, papel });
-    feedback.textContent = 'Perfil salvo com sucesso. Redirecionando para home.';
-    feedback.style.color = '#9be564';
+    saveButton.disabled = true;
+    saveButton.textContent = 'Salvando...';
+    saveButton.style.opacity = '0.7';
+    showFeedback('info', 'Salvando perfil...');
 
-    host.dispatchEvent(new CustomEvent('genoma:navigate', {
-      detail: { target: 'home' },
-      bubbles: true,
-    }));
+    try {
+      await saveProfile({ nome, papel });
+      showFeedback('success', 'Perfil salvo com sucesso. Redirecionando para home.');
+
+      host.dispatchEvent(new CustomEvent('genoma:navigate', {
+        detail: { target: 'home' },
+        bubbles: true,
+      }));
+    } catch (error) {
+      console.error('Erro ao salvar perfil', error);
+      showFeedback('error', 'Não foi possível salvar o perfil. Tente novamente.');
+    } finally {
+      saveButton.disabled = false;
+      saveButton.textContent = 'Salvar perfil';
+      saveButton.style.opacity = '1';
+    }
   });
 
   backButton.addEventListener('click', () => {

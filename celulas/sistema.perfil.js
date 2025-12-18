@@ -1,27 +1,16 @@
-const STORAGE_KEY = 'genoma.profile';
+import { getProfile, saveProfile } from '../core/storage.js';
 
-function readProfile() {
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+async function readProfile() {
+  const profile = await getProfile();
 
-  if (!raw) {
+  if (!profile) {
     return { nome: '', papel: '' };
   }
 
-  try {
-    const data = JSON.parse(raw);
-
-    return {
-      nome: typeof data?.nome === 'string' ? data.nome : '',
-      papel: typeof data?.papel === 'string' ? data.papel : '',
-    };
-  } catch (error) {
-    console.warn('Perfil inválido no storage.', error);
-    return { nome: '', papel: '' };
-  }
-}
-
-function persistProfile(nome, papel) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, papel }));
+  return {
+    nome: typeof profile?.nome === 'string' ? profile.nome : '',
+    papel: typeof profile?.papel === 'string' ? profile.papel : '',
+  };
 }
 
 export function mount(host) {
@@ -107,11 +96,17 @@ export function mount(host) {
   feedback.style.margin = '0';
   feedback.style.opacity = '0.9';
 
-  const stored = readProfile();
-  nameInput.value = stored.nome;
-  roleInput.value = stored.papel;
+  readProfile()
+    .then((stored) => {
+      nameInput.value = stored.nome;
+      roleInput.value = stored.papel;
+    })
+    .catch(() => {
+      nameInput.value = '';
+      roleInput.value = '';
+    });
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const nome = nameInput.value.trim();
@@ -123,7 +118,7 @@ export function mount(host) {
       return;
     }
 
-    persistProfile(nome, papel);
+    await saveProfile({ nome, papel });
     feedback.textContent = 'Perfil salvo com sucesso. Redirecionando para home.';
     feedback.style.color = '#9be564';
 

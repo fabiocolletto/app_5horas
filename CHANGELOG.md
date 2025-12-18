@@ -1,5 +1,11 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-19
+- feat(core): introdução de `core/storage` com Dexie e migração do legado em `localStorage`
+- feat(core): criação de `core/state` para persistir célula ativa, última célula e preferências
+- feat(genoma): bootstrap assíncrono aguardando persistência e rastreando célula ativa
+- refactor(células): célula `sistema.perfil` agora consome a API de storage do core
+
 ## 2025-12-17
 - Etapa concluída: Etapa 6.1 — Geração do Device ID
 - Resumo: Device ID gerado uma única vez via `crypto.randomUUID()` e armazenado em `localStorage` para permanecer estável entre recargas, sem regeneração quando já existir.

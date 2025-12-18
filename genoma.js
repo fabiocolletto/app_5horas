@@ -1,27 +1,35 @@
 import { cellsManifest } from './cells.manifest.js';
+import { getDeviceId, getProfile, initializeStorage, saveDeviceId } from './core/storage.js';
+import { getState, initializeState, setActiveCell } from './core/state.js';
 
 class Genoma {
   constructor() {
     this.root = document.getElementById('genoma-root');
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
-    this.profileKey = 'genoma.profile';
-    this.deviceIdKey = 'genoma.deviceId';
     this.deviceId = null;
-    this.profile = this.loadProfile();
+    this.profile = null;
     this.currentCell = null;
     this.isLoading = false;
 
-    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
+    this.defaultCell = 'sistema.welcome';
 
-    this.ensureDeviceIdentity();
-    this.registerNavigation();
-    this.reportBootstrap();
-    this.loadDefaultCell();
+    this.initialize();
   }
 
-  ensureDeviceIdentity() {
-    const existing = this.readDeviceId();
+  async initialize() {
+    this.updateStatus('Inicializando persistência...');
+    await initializeStorage();
+    await this.ensureDeviceIdentity();
+    await initializeState();
+    this.profile = await getProfile();
+    this.registerNavigation();
+    this.reportBootstrap();
+    await this.loadDefaultCell();
+  }
+
+  async ensureDeviceIdentity() {
+    const existing = await getDeviceId();
 
     if (existing) {
       this.deviceId = existing;
@@ -30,19 +38,9 @@ class Genoma {
     }
 
     const generated = crypto.randomUUID();
-    window.localStorage.setItem(this.deviceIdKey, generated);
+    await saveDeviceId(generated);
     this.deviceId = generated;
     this.updateStatus('Identidade do dispositivo gerada.');
-  }
-
-  readDeviceId() {
-    const stored = window.localStorage.getItem(this.deviceIdKey);
-
-    if (typeof stored === 'string' && stored.trim().length > 0) {
-      return stored;
-    }
-
-    return null;
   }
 
   registerNavigation() {
@@ -72,15 +70,27 @@ class Genoma {
     this.updateStatus(message);
   }
 
-  loadDefaultCell() {
+  async loadDefaultCell() {
+    const { activeCell, lastCell } = getState();
+    const preferred = [activeCell, lastCell].find((candidate) => typeof candidate === 'string' && candidate.trim().length > 0);
+
+    if (preferred) {
+      const exists = this.manifest.some((entry) => entry.name === preferred);
+      if (exists) {
+        await this.loadCell(preferred);
+        return;
+      }
+    }
+
+    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
     const exists = this.manifest.some((entry) => entry.name === this.defaultCell);
     if (exists) {
-      this.loadCell(this.defaultCell);
+      await this.loadCell(this.defaultCell);
     }
   }
 
-  loadCell(name) {
-    this.profile = this.loadProfile();
+  async loadCell(name) {
+    this.profile = await getProfile();
     const needsProfile = name !== 'sistema.perfil' && !this.profile;
     const targetName = needsProfile ? 'sistema.perfil' : name;
 
@@ -98,52 +108,32 @@ class Genoma {
     this.isLoading = true;
     this.updateStatus(`Carregando célula "${targetName}"...`);
 
-    import(cell.module)
-      .then((module) => {
-        if (typeof module.mount !== 'function') {
-          this.updateStatus(`Célula "${targetName}" não expõe a função mount.`);
-          return;
-        }
+    try {
+      const module = await import(cell.module);
 
-        if (this.root) {
-          module.mount(this.root);
-          this.currentCell = targetName;
-        }
-        this.updateStatus(`Célula "${targetName}" carregada.`);
-      })
-      .catch((error) => {
-        console.error(error);
-        this.updateStatus(`Falha ao carregar célula "${targetName}".`);
-      })
-      .finally(() => {
-        this.isLoading = false;
-      });
+      if (typeof module.mount !== 'function') {
+        this.updateStatus(`Célula "${targetName}" não expõe a função mount.`);
+        return;
+      }
+
+      if (this.root) {
+        await module.mount(this.root);
+        this.currentCell = targetName;
+        await setActiveCell(targetName);
+      }
+      this.updateStatus(`Célula "${targetName}" carregada.`);
+    } catch (error) {
+      console.error(error);
+      this.updateStatus(`Falha ao carregar célula "${targetName}".`);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   updateStatus(message) {
     if (this.status) {
       this.status.textContent = message;
     }
-  }
-
-  loadProfile() {
-    const raw = window.localStorage.getItem(this.profileKey);
-
-    if (!raw) {
-      return null;
-    }
-
-    try {
-      const profile = JSON.parse(raw);
-
-      if (typeof profile?.nome === 'string' && typeof profile?.papel === 'string') {
-        return profile;
-      }
-    } catch (error) {
-      console.warn('Falha ao ler perfil armazenado.', error);
-    }
-
-    return null;
   }
 }
 

@@ -1,5 +1,10 @@
 import { state } from '../core/state.js';
 
+function buildExportFileName(deviceId) {
+  const normalized = typeof deviceId === 'string' && deviceId.trim().length > 0 ? deviceId.trim() : '';
+  return normalized ? `genoma-state-${normalized}.json` : 'genoma-state.json';
+}
+
 function styleInput(input) {
   input.style.padding = '0.75rem';
   input.style.borderRadius = '10px';
@@ -94,11 +99,12 @@ export const cell = {
       const url = URL.createObjectURL(blob);
       const downloader = document.createElement('a');
       downloader.href = url;
-      downloader.download = 'genoma-state.json';
+      const exportFileName = buildExportFileName(state.getDeviceId() || context.deviceId);
+      downloader.download = exportFileName;
       downloader.click();
       URL.revokeObjectURL(url);
 
-      feedback.textContent = 'Configurações exportadas com sucesso.';
+      feedback.textContent = `Configurações exportadas como "${exportFileName}".`;
       feedback.style.color = '#9be564';
     });
 

@@ -116,6 +116,8 @@ Atualmente são registrados:
 
 Sempre que possível, o app solicita persistência via Storage API para evitar que o navegador remova dados automaticamente; a limpeza manual do armazenamento pelo usuário ainda apagará todas as informações.
 
+O **ID do dispositivo** compõe o nome padrão do arquivo exportado (`genoma-state-<id>.json`) e aparece na tela de boas-vindas para ajudar a localizar rapidamente os backups salvos localmente.
+
 As células recebem no `context` apenas funções para ler/atualizar esses dados (`profile`, `preferences`, `updateProfile`, `updatePreferences`), mantendo o acesso ao armazenamento centralizado e permitindo trocar a implementação sem quebrar módulos.
 
 ### Contrato Mínimo de Célula (Etapa 1.3.1)

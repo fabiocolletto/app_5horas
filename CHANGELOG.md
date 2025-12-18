@@ -1,6 +1,10 @@
 # CHANGELOG — Genoma v1.2
 
-# 2025-12-20
+## 2025-12-21
+- Etapa concluída: Etapa 6.4 — Associação dos Dados Locais Existentes
+- Resumo: Dados legados agora são associados ao deviceId com chaves nomeadas (`genoma:{deviceId}:...`), preservando compatibilidade com a estrutura da v1.2 e garantindo que o perfil seja referenciado pelo identificador do dispositivo.
+
+## 2025-12-20
 - Etapa concluída: Etapa 6.3 — Reidratação Cruzada do Device ID
 - Resumo: Implementada leitura cruzada entre localStorage e IndexedDB para reidratar o deviceId quando um storage é limpo, repopulando automaticamente o outro antes de prosseguir.
 

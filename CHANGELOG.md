@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.2
 
+# 2025-12-20
+- Etapa concluída: Etapa 6.3 — Reidratação Cruzada do Device ID
+- Resumo: Implementada leitura cruzada entre localStorage e IndexedDB para reidratar o deviceId quando um storage é limpo, repopulando automaticamente o outro antes de prosseguir.
+
 ## 2025-12-19
 - Etapa concluída: Etapa 6.2 — Persistência Redundante do Device ID
 - Resumo: O deviceId agora é persistido simultaneamente no localStorage e no IndexedDB nativo, garantindo redundância sem dependências externas.

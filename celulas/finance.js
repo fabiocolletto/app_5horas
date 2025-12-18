@@ -23,7 +23,7 @@ function createActionButton(label, background, color = '#0b132b') {
 export const cell = {
   id: 'finance',
   name: 'Painel Financeiro',
-  version: '1.3.1',
+  version: '1.4.0',
   init(context) {
     const container = document.createElement('section');
     container.style.display = 'grid';

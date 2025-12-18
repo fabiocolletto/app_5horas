@@ -2,6 +2,7 @@ import { cellsManifest } from './cells.manifest.js';
 import { events, EVENT_TYPES } from './core/events.js';
 import { logger } from './core/logger.js';
 import { state } from './core/state.js';
+import { appMeta } from './core/app.meta.js';
 
 class Genoma {
   constructor() {
@@ -11,6 +12,7 @@ class Genoma {
     this.events = events;
     this.logger = logger;
     this.state = state;
+    this.meta = appMeta;
     this.deviceId = this.state.getDeviceId();
     this.profile = this.state.getProfile();
     this.currentCellId = this.state.getActiveCell();
@@ -20,11 +22,33 @@ class Genoma {
     const restoredCell = this.currentCellId || this.state.getLastCell();
     this.defaultCell = restoredCell || (this.profile ? 'home' : 'sistema.perfil');
 
+    this.applyBranding();
+    this.validateManifest();
     this.ensureDeviceIdentity();
     this.reportDebugMode();
     this.registerNavigation();
     this.reportBootstrap();
     this.loadDefaultCell();
+  }
+
+  applyBranding() {
+    const name = this.meta?.name || 'Genoma';
+    const version = this.meta?.appVersion ? `v${this.meta.appVersion}` : '';
+    const milestone = this.meta?.milestone || '';
+    const title = [name, version].filter(Boolean).join(' ');
+
+    if (title) {
+      document.title = title;
+      const headerTitle = document.getElementById('genoma-title');
+      if (headerTitle) {
+        headerTitle.textContent = title;
+      }
+    }
+
+    const milestoneTag = document.getElementById('genoma-milestone');
+    if (milestoneTag && milestone) {
+      milestoneTag.textContent = milestone;
+    }
   }
 
   ensureDeviceIdentity() {
@@ -40,6 +64,45 @@ class Genoma {
     this.deviceId = generated;
     this.state.setDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
+  }
+
+  validateManifest() {
+    if (!Array.isArray(this.manifest)) {
+      this.updateStatus('Manifesto inválido: estrutura desconhecida.');
+      this.manifest = [];
+      return;
+    }
+
+    const validEntries = [];
+    const seenIds = new Set();
+    const invalidEntries = [];
+    const duplicates = [];
+
+    this.manifest.forEach((entry) => {
+      const hasShape = entry && typeof entry.id === 'string' && typeof entry.module === 'string';
+      if (!hasShape) {
+        invalidEntries.push(entry);
+        return;
+      }
+
+      if (seenIds.has(entry.id)) {
+        duplicates.push(entry.id);
+        return;
+      }
+
+      seenIds.add(entry.id);
+      validEntries.push(entry);
+    });
+
+    if (invalidEntries.length > 0) {
+      this.updateStatus(`Manifesto ignorou ${invalidEntries.length} entrada(s) inválida(s).`);
+    }
+
+    if (duplicates.length > 0) {
+      this.updateStatus(`Manifesto possui ids duplicados: ${[...new Set(duplicates)].join(', ')}.`);
+    }
+
+    this.manifest = validEntries;
   }
 
   reportDebugMode() {
@@ -69,11 +132,13 @@ class Genoma {
 
   reportBootstrap() {
     const total = this.manifest.length;
-    const message = total === 0
+    const baseMessage = total === 0
       ? 'Manifesto vazio: nenhuma célula registrada.'
       : `Manifesto carregado com ${total} célula(s).`;
-    this.updateStatus(message);
-    this.logger.debug('Manifesto analisado.', { total });
+    const versionTag = this.meta?.appVersion ? `App ${this.meta.appVersion}` : 'App 5Horas';
+    const milestoneTag = this.meta?.milestone ? ` • ${this.meta.milestone}` : '';
+    this.updateStatus(`${versionTag}${milestoneTag}. ${baseMessage}`);
+    this.logger.debug('Manifesto analisado.', { total, milestone: this.meta?.milestone });
   }
 
   loadDefaultCell() {

@@ -10,12 +10,11 @@ Ele é a referência máxima de comportamento técnico e arquitetural do projeto
 
 ## Estado Atual do Projeto
 
-Versão atual: **1.3**
+Versão atual: **1.4.0** (fonte única: `core/app.meta.js`)
 
-O App 5Horas encontra-se em um estágio **estruturalmente funcional**, porém ainda em processo de consolidação como **plataforma operacional**.
+O App 5Horas atingiu o **Marco 1.4 — Plataforma Operacional**. O genoma valida o contrato das células, mantém estado e observabilidade centralizados e possui pelo menos três células reais (`home`, `finance`, `education`), além das células sistêmicas (`sistema.welcome`, `sistema.perfil`) e do modelo canônico.
 
-A partir deste ponto, **não são permitidas evoluções aleatórias**.
-Toda mudança deve obedecer às etapas definidas neste documento.
+Evoluções seguem controladas: nenhuma mudança fora do escopo ou do manifesto é aceita.
 
 ---
 
@@ -35,6 +34,8 @@ Toda mudança deve obedecer às etapas definidas neste documento.
 
 O Marco **1.4 não é uma versão incremental**, é um **selo de maturidade**.
 Ele só existe após a conclusão e aprovação das quatro etapas abaixo.
+
+**Status:** etapas 1.3.1 a 1.3.4 concluídas. Use-as como checklist mínimo para qualquer célula ou ajuste estrutural.
 
 ---
 
@@ -157,6 +158,17 @@ O Marco **1.4** é atingido quando:
 * O App 5Horas pode ser estendido sem reescrita estrutural
 
 A partir do 1.4, o projeto passa a evoluir por **capacidades**, não por improvisação.
+
+---
+
+## Pós-Marco 1.4 — Direção imediata
+
+* Novas células devem seguir o contrato e entrar apenas via manifesto (genoma permanece intocado)
+* Observabilidade (eventos + logger) é a fonte única de diagnóstico
+* Próximas capacidades desejadas:
+  * Catálogo versionado de células e documentação por release
+  * Modo offline/PWA
+  * Checklist de segurança e performance por célula
 
 ---
 

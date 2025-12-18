@@ -24,7 +24,7 @@ function createActionButton(label, background, onClick) {
 export const cell = {
   id: 'home',
   name: 'Home',
-  version: '1.3.1',
+  version: '1.4.0',
   init(context) {
     const container = document.createElement('section');
     applyContainerStyles(container);

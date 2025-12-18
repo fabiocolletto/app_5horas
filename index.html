@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Genoma v1.3</title>
+  <title>Genoma</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -20,9 +20,25 @@
     }
 
     header {
-      padding: 1rem;
+      padding: 1rem 1.5rem;
       background: #1c2541;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .branding {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    #genoma-title {
+      font-size: 1.2rem;
+    }
+
+    #genoma-milestone {
+      color: #9be564;
+      font-weight: 600;
+      font-size: 0.95rem;
     }
 
     main {
@@ -43,7 +59,10 @@
 </head>
 <body>
   <header>
-    <strong>Genoma v1.3</strong>
+    <div class="branding">
+      <strong id="genoma-title">App 5Horas</strong>
+      <span id="genoma-milestone">Marco 1.4 — Plataforma Operacional</span>
+    </div>
   </header>
   <main id="genoma-shell">
     <section class="status" aria-live="polite">

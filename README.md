@@ -27,17 +27,32 @@ Essa abordagem permite:
 
 ## Status do Projeto
 
-🟡 **Em desenvolvimento ativo**
+🟢 **Marco 1.4 — Plataforma Operacional**
 
-Atualmente o projeto possui:
+O app agora possui:
 
-* Estrutura base funcional
-* Genoma inicial implementado
-* Registro de células via manifesto
-* Organização modular clara
-* Documentação técnica inicial (`agent.md`, `CHANGELOG.md`)
+* Versão consolidada **1.4.0** definida em `core/app.meta.js`
+* Genoma com validação de manifesto, contrato celular e observabilidade central
+* Estado global persistente (perfil, preferências, célula ativa e último acesso)
+* Pelo menos **3 células reais** funcionais e independentes (`home`, `finance`, `education`), além das células sistêmicas (`sistema.welcome`, `sistema.perfil`) e do modelo canônico
+* Documentação alinhada entre README, `agent.md` e `CHANGELOG.md`
 
-Próximas etapas estão descritas no roadmap abaixo.
+Novas células podem ser adicionadas sem alterar o genoma: basta seguir o contrato e registrá-las no manifesto.
+
+### Validação visual
+
+* O `index.html` foi conferido manualmente no marco 1.4.0: cabeçalho, navegação entre células (`home`, `finance`, `education`), painéis sistêmicos e rodapés aparecem conforme esperado.
+* Para reproduzir a checagem, sirva a raiz do projeto com `python -m http.server 8000` e acesse `http://localhost:8000/`.
+
+---
+
+## Versionamento e Marcos
+
+* **appVersion:** `1.4.0` (`core/app.meta.js`)
+* **Marco ativo:** `Marco 1.4 — Plataforma Operacional`
+* **Histórico concluído:** etapas 1.3.1 a 1.3.4 registradas em `CHANGELOG.md`
+
+Use o `app.meta.js` como fonte única para rótulos de versão e milestone em interfaces ou diagnósticos.
 
 ---
 
@@ -51,6 +66,7 @@ app_5horas/
 ├── celulas/              # Módulos funcionais independentes
 │   └── ...               # Cada célula possui sua própria estrutura
 ├── core/                 # Funções centrais compartilhadas
+│   └── app.meta.js       # Metadados oficiais de versão e marcos
 ├── tools/                # Utilitários e helpers globais
 ├── agent.md              # Instruções e regras do agente do projeto
 ├── CHANGELOG.md          # Histórico de versões e mudanças
@@ -112,6 +128,12 @@ A partir da versão **1.3.1** cada célula precisa seguir um contrato explícito
 
 O Genoma valida essas propriedades antes de ativar qualquer módulo. Células que não atendem ao contrato são rejeitadas e o status exibe o motivo.
 
+**Como adicionar uma nova célula sem tocar no genoma:**
+
+1. Crie o arquivo da célula em `celulas/` seguindo o contrato acima.
+2. Registre-a apenas no `cells.manifest.js` com `id` e `module`.
+3. O Genoma valida o manifesto e rejeita entradas inválidas ou duplicadas automaticamente.
+
 ---
 
 ## Como Rodar Localmente
@@ -146,26 +168,18 @@ Para desenvolvimento mais avançado, recomenda-se rodar via servidor local (ex: 
 
 ---
 
-## Roadmap (Próximas Etapas)
+## Roadmap (Pós-Marco 1.4)
 
-### Curto Prazo
+### Manutenção imediata
 
-* Consolidar documentação das células existentes
-* Definir contrato formal de inicialização das células
-* Padronizar naming e estrutura interna das células
+* Garantir que novas células sigam o contrato e sejam registradas apenas via manifesto
+* Manter observabilidade central (eventos e logger) como fonte única de diagnóstico
 
-### Médio Prazo
+### Próximas capacidades
 
-* Introduzir persistência local (ex: IndexedDB / Dexie)
-* Criar sistema básico de estado global
-* Implementar carregamento condicional de células
-
-### Longo Prazo
-
-* Pipeline de CI/CD
-* Versão PWA
-* Controle de permissões por célula
-* Publicação estável com versionamento semântico
+* Catálogo versionado de células e documentação por release
+* Modo offline/PWA e empacotamento leve para publicação
+* Checklist de segurança e performance para novas células
 
 ---
 

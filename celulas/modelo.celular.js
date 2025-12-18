@@ -64,7 +64,7 @@ function createBadge(text) {
 export const cell = {
   id: 'modelo.celular',
   name: 'Modelo Canônico',
-  version: '1.3.1',
+  version: '1.4.0',
   init(context) {
     const container = document.createElement('section');
     applyStyles(container, styles.container);
@@ -73,7 +73,7 @@ export const cell = {
     title.textContent = 'Contrato Mínimo de Célula';
     title.style.margin = '0';
 
-    const badge = createBadge('v1.3.1 — contrato ativo');
+    const badge = createBadge('v1.4.0 — contrato ativo');
 
     const intro = document.createElement('p');
     intro.style.margin = '0';

@@ -1,19 +1,20 @@
 import { cellsManifest } from './cells.manifest.js';
+import { state } from './core/state.js';
 
 class Genoma {
   constructor() {
     this.root = document.getElementById('genoma-root');
     this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
-    this.profileKey = 'genoma.profile';
-    this.deviceIdKey = 'genoma.deviceId';
-    this.deviceId = null;
-    this.profile = this.loadProfile();
-    this.currentCellId = null;
+    this.state = state;
+    this.deviceId = this.state.getDeviceId();
+    this.profile = this.state.getProfile();
+    this.currentCellId = this.state.getActiveCell();
     this.currentCell = null;
     this.isLoading = false;
 
-    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
+    const restoredCell = this.currentCellId || this.state.getLastCell();
+    this.defaultCell = restoredCell || (this.profile ? 'home' : 'sistema.perfil');
 
     this.ensureDeviceIdentity();
     this.registerNavigation();
@@ -22,7 +23,7 @@ class Genoma {
   }
 
   ensureDeviceIdentity() {
-    const existing = this.readDeviceId();
+    const existing = this.state.getDeviceId();
 
     if (existing) {
       this.deviceId = existing;
@@ -31,19 +32,9 @@ class Genoma {
     }
 
     const generated = crypto.randomUUID();
-    window.localStorage.setItem(this.deviceIdKey, generated);
     this.deviceId = generated;
+    this.state.setDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
-  }
-
-  readDeviceId() {
-    const stored = window.localStorage.getItem(this.deviceIdKey);
-
-    if (typeof stored === 'string' && stored.trim().length > 0) {
-      return stored;
-    }
-
-    return null;
   }
 
   registerNavigation() {
@@ -120,6 +111,7 @@ class Genoma {
 
     this.currentCell = null;
     this.currentCellId = null;
+    this.state.setActiveCell(null);
   }
 
   createContext(targetId) {
@@ -127,6 +119,9 @@ class Genoma {
       host: this.root,
       profile: this.profile,
       deviceId: this.deviceId,
+      preferences: this.state.getPreferences(),
+      updateProfile: (data) => this.setProfile(data),
+      updatePreferences: (patch) => this.state.updatePreferences(patch),
       navigate: (destination) => this.navigate(destination, targetId),
     };
   }
@@ -150,7 +145,7 @@ class Genoma {
   }
 
   loadCell(targetId) {
-    this.profile = this.loadProfile();
+    this.profile = this.state.getProfile();
     const needsProfile = targetId !== 'sistema.perfil' && !this.profile;
     const chosenId = needsProfile ? 'sistema.perfil' : targetId;
 
@@ -185,6 +180,7 @@ class Genoma {
         this.currentCell = candidate;
         this.currentCellId = chosenId;
 
+        this.state.setActiveCell(chosenId);
         this.updateStatus(`Célula "${candidate.name}" (v${candidate.version}) carregada.`);
       })
       .catch((error) => {
@@ -202,24 +198,8 @@ class Genoma {
     }
   }
 
-  loadProfile() {
-    const raw = window.localStorage.getItem(this.profileKey);
-
-    if (!raw) {
-      return null;
-    }
-
-    try {
-      const profile = JSON.parse(raw);
-
-      if (typeof profile?.nome === 'string' && typeof profile?.papel === 'string') {
-        return profile;
-      }
-    } catch (error) {
-      console.warn('Falha ao ler perfil armazenado.', error);
-    }
-
-    return null;
+  setProfile(profile) {
+    this.profile = this.state.setProfile(profile);
   }
 }
 

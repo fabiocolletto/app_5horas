@@ -13,7 +13,8 @@ function isStorageAvailable(candidate) {
   }
 }
 
-const persistenceRequest = navigator?.storage?.persist
+const hasNavigator = typeof navigator !== 'undefined';
+const persistenceRequest = hasNavigator && navigator.storage?.persist
   ? navigator.storage.persist()
   : null;
 
@@ -27,7 +28,8 @@ if (persistenceRequest?.then) {
     .catch(() => undefined);
 }
 
-const engine = isStorageAvailable(window?.localStorage) ? window.localStorage : null;
+const hasWindow = typeof window !== 'undefined';
+const engine = hasWindow && isStorageAvailable(window.localStorage) ? window.localStorage : null;
 
 function readFromMemory(key) {
   return MEMORY_FALLBACK.has(key) ? MEMORY_FALLBACK.get(key) : null;

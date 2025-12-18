@@ -1,5 +1,9 @@
 # CHANGELOG — Genoma v1.3
 
+## 2025-12-20
+- Etapa concluída: Etapa 1.3.2 — Estado Global e Persistência
+- Resumo: Criados módulos `core/state` e `core/storage` para persistir célula ativa, última célula e preferências; Genoma e célula de perfil passaram a usar o estado central, eliminando acessos diretos a `localStorage` pelas células.
+
 ## 2025-12-19
 - Etapa concluída: Etapa 1.3.1 — Contrato Celular Formal
 - Resumo: Genoma agora valida contrato mínimo (id, name, version, init, destroy) antes de ativar uma célula; manifesto atualizado, células existentes adaptadas e célula modelo canônica adicionada.

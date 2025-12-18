@@ -1,29 +1,3 @@
-const STORAGE_KEY = 'genoma.profile';
-
-function readProfile() {
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-
-  if (!raw) {
-    return { nome: '', papel: '' };
-  }
-
-  try {
-    const data = JSON.parse(raw);
-
-    return {
-      nome: typeof data?.nome === 'string' ? data.nome : '',
-      papel: typeof data?.papel === 'string' ? data.papel : '',
-    };
-  } catch (error) {
-    console.warn('Perfil inválido no storage.', error);
-    return { nome: '', papel: '' };
-  }
-}
-
-function persistProfile(nome, papel) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, papel }));
-}
-
 function styleInput(input) {
   input.style.padding = '0.75rem';
   input.style.borderRadius = '10px';
@@ -49,7 +23,7 @@ function createButton(label, background, color = '#0b132b') {
 export const cell = {
   id: 'sistema.perfil',
   name: 'Perfil do Genoma',
-  version: '1.3.1',
+  version: '1.3.2',
   init(context) {
     const container = document.createElement('section');
     container.style.display = 'grid';
@@ -109,7 +83,7 @@ export const cell = {
     feedback.style.margin = '0';
     feedback.style.opacity = '0.9';
 
-    const stored = readProfile();
+    const stored = context.profile || { nome: '', papel: '' };
     nameInput.value = stored.nome;
     roleInput.value = stored.papel;
 
@@ -125,7 +99,9 @@ export const cell = {
         return;
       }
 
-      persistProfile(nome, papel);
+      if (typeof context.updateProfile === 'function') {
+        context.updateProfile({ nome, papel });
+      }
       feedback.textContent = 'Perfil salvo com sucesso. Redirecionando para home.';
       feedback.style.color = '#9be564';
 

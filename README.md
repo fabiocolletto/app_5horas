@@ -88,6 +88,18 @@ O arquivo `cells.manifest.js` funciona como:
 * Contrato entre o genoma e as células
 * Ponto único de controle de carregamento
 
+### Estado e Persistência (Etapa 1.3.2)
+
+O Genoma mantém um **estado global persistente** através dos módulos `core/state` e `core/storage`.
+Atualmente são registrados:
+
+* Célula ativa
+* Última célula carregada
+* Preferências básicas (ex.: tema)
+* Perfil do usuário e identidade do dispositivo
+
+As células recebem no `context` apenas funções para ler/atualizar esses dados (`profile`, `preferences`, `updateProfile`, `updatePreferences`), mantendo o acesso ao armazenamento centralizado e permitindo trocar a implementação sem quebrar módulos.
+
 ### Contrato Mínimo de Célula (Etapa 1.3.1)
 
 A partir da versão **1.3.1** cada célula precisa seguir um contrato explícito para ser carregada pelo Genoma:

@@ -16,18 +16,24 @@ class Genoma {
     this.indexedDbName = 'genoma';
     this.indexedDbStore = 'genomaStore';
     this.indexedDbInstance = null;
-    this.profile = this.loadProfile();
+    this.profile = null;
     this.currentCell = null;
     this.isLoading = false;
 
-    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
+    this.defaultCell = 'sistema.perfil';
 
-    this.ensureDeviceIdentity().catch((error) => {
-      console.error('Falha ao garantir a identidade do dispositivo.', error);
-      this.updateStatus('Falha ao inicializar a identidade do dispositivo.');
+    this.initialize().catch((error) => {
+      console.error('Falha ao inicializar o Genoma.', error);
+      this.updateStatus('Falha ao inicializar o Genoma.');
     });
-    this.registerNavigation();
+  }
+
+  async initialize() {
     this.reportBootstrap();
+    await this.ensureDeviceIdentity();
+    this.profile = this.loadProfile();
+    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
+    this.registerNavigation();
     this.loadDefaultCell();
   }
 
@@ -46,6 +52,7 @@ class Genoma {
       }
 
       await this.persistDeviceId(existing);
+      await this.validateDeviceIdConsistency();
       this.associateLocalDataWithDevice();
       return;
     }
@@ -53,6 +60,7 @@ class Genoma {
     const generated = crypto.randomUUID();
     this.deviceId = generated;
     await this.persistDeviceId(generated);
+    await this.validateDeviceIdConsistency();
     this.updateStatus('Identidade do dispositivo gerada.');
     this.associateLocalDataWithDevice();
   }
@@ -91,6 +99,7 @@ class Genoma {
       });
     } catch (error) {
       console.error('Falha ao ler deviceId do IndexedDB.', error);
+      this.updateStatus('IndexedDB indisponível para leitura do deviceId.');
       return null;
     }
   }
@@ -102,6 +111,24 @@ class Genoma {
       await this.saveDeviceIdToIndexedDb(deviceId);
     } catch (error) {
       console.error('Falha ao salvar deviceId no IndexedDB.', error);
+      this.updateStatus('IndexedDB indisponível para salvar o deviceId.');
+    }
+  }
+
+  async validateDeviceIdConsistency() {
+    const localId = this.readDeviceIdFromLocalStorage();
+    const indexedId = await this.readDeviceIdFromIndexedDb();
+
+    if (!localId && !indexedId) {
+      this.updateStatus('Nenhuma fonte de deviceId disponível após a persistência.');
+      return;
+    }
+
+    const canonicalId = localId || indexedId;
+
+    if (!localId || !indexedId || localId !== indexedId) {
+      await this.persistDeviceId(canonicalId);
+      this.updateStatus('DeviceId reidratado após inconsistência entre storages.');
     }
   }
 

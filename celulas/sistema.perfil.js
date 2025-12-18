@@ -1,3 +1,5 @@
+import { state } from '../core/state.js';
+
 function styleInput(input) {
   input.style.padding = '0.75rem';
   input.style.borderRadius = '10px';
@@ -79,6 +81,76 @@ export const cell = {
     const backButton = createButton('Voltar ao welcome', '#3a506b', '#e0e6ed');
     backButton.addEventListener('click', () => context.navigate('sistema.welcome'));
 
+    const exportButton = createButton('Exportar configurações', '#9be564');
+    const importButton = createButton('Importar', '#f7b267');
+    const filePicker = document.createElement('input');
+    filePicker.type = 'file';
+    filePicker.accept = 'application/json';
+    filePicker.style.display = 'none';
+
+    exportButton.addEventListener('click', () => {
+      const snapshot = state.exportState();
+      const blob = new Blob([snapshot], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const downloader = document.createElement('a');
+      downloader.href = url;
+      downloader.download = 'genoma-state.json';
+      downloader.click();
+      URL.revokeObjectURL(url);
+
+      feedback.textContent = 'Configurações exportadas com sucesso.';
+      feedback.style.color = '#9be564';
+    });
+
+    const reportImportResult = (result) => {
+      if (!result.success) {
+        feedback.textContent = result.warnings.join(' ') || 'Não foi possível importar o arquivo.';
+        feedback.style.color = '#f7b267';
+        return;
+      }
+
+      const warnings = result.warnings.length > 0 ? ` Avisos: ${result.warnings.join(' ')}` : '';
+      feedback.textContent = `Configurações importadas.${warnings}`;
+      feedback.style.color = '#9be564';
+
+      const importedProfile = state.getProfile() || { nome: '', papel: '' };
+      nameInput.value = importedProfile.nome || '';
+      roleInput.value = importedProfile.papel || '';
+      context.profile = importedProfile;
+    };
+
+    filePicker.addEventListener('change', (event) => {
+      const [file] = event.target.files || [];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const content = typeof reader.result === 'string' ? reader.result : '';
+          const parsed = JSON.parse(content);
+          const result = state.importState(parsed);
+          reportImportResult(result);
+        } catch (error) {
+          feedback.textContent = 'Arquivo inválido ou corrompido.';
+          feedback.style.color = '#f7b267';
+        } finally {
+          filePicker.value = '';
+        }
+      };
+
+      reader.onerror = () => {
+        feedback.textContent = 'Não foi possível ler o arquivo selecionado.';
+        feedback.style.color = '#f7b267';
+        filePicker.value = '';
+      };
+
+      reader.readAsText(file);
+    });
+
+    importButton.addEventListener('click', () => {
+      filePicker.click();
+    });
+
     const feedback = document.createElement('p');
     feedback.style.margin = '0';
     feedback.style.opacity = '0.9';
@@ -108,8 +180,8 @@ export const cell = {
       context.navigate('home');
     });
 
-    form.append(nameLabel, nameInput, roleLabel, roleInput, actions, feedback);
-    actions.append(saveButton, backButton);
+    form.append(nameLabel, nameInput, roleLabel, roleInput, actions, feedback, filePicker);
+    actions.append(saveButton, backButton, exportButton, importButton);
 
     container.append(title, description, form);
     context.host.replaceChildren(container);

@@ -9,6 +9,7 @@ class Genoma {
     this.deviceIdKey = 'genoma.deviceId';
     this.deviceId = null;
     this.profile = this.loadProfile();
+    this.currentCellId = null;
     this.currentCell = null;
     this.isLoading = false;
 
@@ -48,19 +49,19 @@ class Genoma {
   registerNavigation() {
     window.addEventListener('genoma:navigate', (event) => {
       const target = event.detail?.target;
-      const targetName = typeof target === 'string' ? target.trim() : '';
+      const targetId = typeof target === 'string' ? target.trim() : '';
 
-      if (!targetName) {
+      if (!targetId) {
         this.updateStatus('Evento de navegação recebido sem destino válido.');
         return;
       }
 
-      if (this.currentCell === targetName && !this.isLoading) {
-        this.updateStatus(`Célula "${targetName}" já está ativa.`);
+      if (this.currentCellId === targetId && !this.isLoading) {
+        this.updateStatus(`Célula "${targetId}" já está ativa.`);
         return;
       }
 
-      this.loadCell(targetName);
+      this.loadCell(targetId);
     });
   }
 
@@ -73,47 +74,122 @@ class Genoma {
   }
 
   loadDefaultCell() {
-    const exists = this.manifest.some((entry) => entry.name === this.defaultCell);
+    const exists = this.manifest.some((entry) => entry.id === this.defaultCell);
     if (exists) {
       this.loadCell(this.defaultCell);
     }
   }
 
-  loadCell(name) {
+  validateCellContract(cell) {
+    if (!cell || typeof cell !== 'object') {
+      return 'Módulo de célula inválido ou não exportado.';
+    }
+
+    const stringProps = ['id', 'name', 'version'];
+    const missingStrings = stringProps.filter((prop) => typeof cell[prop] !== 'string' || cell[prop].trim().length === 0);
+
+    if (missingStrings.length > 0) {
+      return `Contrato celular incompleto: faltando ${missingStrings.join(', ')}.`;
+    }
+
+    if (typeof cell.init !== 'function') {
+      return 'Contrato celular inválido: função init(context) ausente.';
+    }
+
+    if (typeof cell.destroy !== 'function') {
+      return 'Contrato celular inválido: função destroy() ausente.';
+    }
+
+    return null;
+  }
+
+  teardownCurrentCell() {
+    if (!this.currentCell) {
+      return;
+    }
+
+    try {
+      this.currentCell.destroy();
+    } catch (error) {
+      console.warn(`Falha ao destruir célula "${this.currentCellId}".`, error);
+    }
+
+    if (this.root) {
+      this.root.replaceChildren();
+    }
+
+    this.currentCell = null;
+    this.currentCellId = null;
+  }
+
+  createContext(targetId) {
+    return {
+      host: this.root,
+      profile: this.profile,
+      deviceId: this.deviceId,
+      navigate: (destination) => this.navigate(destination, targetId),
+    };
+  }
+
+  navigate(destination, origin) {
+    const targetId = typeof destination === 'string' ? destination.trim() : '';
+
+    if (!targetId) {
+      this.updateStatus('Navegação ignorada: destino vazio.');
+      return;
+    }
+
+    if (targetId === origin) {
+      this.updateStatus(`Célula "${targetId}" já está ativa.`);
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: targetId },
+    }));
+  }
+
+  loadCell(targetId) {
     this.profile = this.loadProfile();
-    const needsProfile = name !== 'sistema.perfil' && !this.profile;
-    const targetName = needsProfile ? 'sistema.perfil' : name;
+    const needsProfile = targetId !== 'sistema.perfil' && !this.profile;
+    const chosenId = needsProfile ? 'sistema.perfil' : targetId;
 
     if (needsProfile) {
       this.updateStatus('Perfil não encontrado. Redirecionando para cadastro.');
     }
 
-    const cell = this.manifest.find((entry) => entry.name === targetName);
+    const cellEntry = this.manifest.find((entry) => entry.id === chosenId);
 
-    if (!cell) {
-      this.updateStatus(`Célula "${targetName}" não encontrada no manifesto.`);
+    if (!cellEntry) {
+      this.updateStatus(`Célula "${chosenId}" não encontrada no manifesto.`);
       return;
     }
 
     this.isLoading = true;
-    this.updateStatus(`Carregando célula "${targetName}"...`);
+    this.updateStatus(`Carregando célula "${chosenId}"...`);
 
-    import(cell.module)
+    import(cellEntry.module)
       .then((module) => {
-        if (typeof module.mount !== 'function') {
-          this.updateStatus(`Célula "${targetName}" não expõe a função mount.`);
+        const candidate = module.cell ?? module.default;
+        const contractIssue = this.validateCellContract(candidate);
+
+        if (contractIssue) {
+          this.updateStatus(`Contrato inválido para "${chosenId}": ${contractIssue}`);
           return;
         }
 
-        if (this.root) {
-          module.mount(this.root);
-          this.currentCell = targetName;
-        }
-        this.updateStatus(`Célula "${targetName}" carregada.`);
+        this.teardownCurrentCell();
+
+        const context = this.createContext(chosenId);
+        candidate.init(context);
+        this.currentCell = candidate;
+        this.currentCellId = chosenId;
+
+        this.updateStatus(`Célula "${candidate.name}" (v${candidate.version}) carregada.`);
       })
       .catch((error) => {
         console.error(error);
-        this.updateStatus(`Falha ao carregar célula "${targetName}".`);
+        this.updateStatus(`Falha ao carregar célula "${chosenId}".`);
       })
       .finally(() => {
         this.isLoading = false;

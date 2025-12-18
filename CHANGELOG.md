@@ -1,4 +1,11 @@
-# CHANGELOG — Genoma v1.2
+# CHANGELOG — Genoma v1.3
+
+## 2025-12-20
+- UI: Fonte open-source Inter adotada no shell para melhorar legibilidade em formulários e dados do usuário, mantendo consistência entre células.
+
+## 2025-12-19
+- Etapa concluída: Etapa 1.3.1 — Contrato Celular Formal
+- Resumo: Genoma agora valida contrato mínimo (id, name, version, init, destroy) antes de ativar uma célula; manifesto atualizado, células existentes adaptadas e célula modelo canônica adicionada.
 
 ## 2025-12-17
 - Etapa concluída: Etapa 6.1 — Geração do Device ID

@@ -1,197 +1,179 @@
-# Guia de Execução do Genoma
+# AGENT.md
 
-Este documento consolida as diretrizes de governança das versões v1.2 e v1.3.
-Consulte o `CHANGELOG.md` para detalhes de cada entrega.
+**App 5Horas — Governança Técnica e Roadmap Controlado**
 
-## Status das Etapas — v1.2
-- [x] Etapa 1 — Bootstrap do Repositório (concluída)
-- [x] Etapa 2 — Células Base
-- [x] Etapa 3 — Célula Perfil
-- [x] Etapa 4 — Células Funcionais
-- [x] Etapa 5 — Estabilização
+Este documento define **como o projeto App 5Horas deve evoluir**, quais decisões são permitidas e quais são proibidas, e qual é o **caminho oficial até o Marco 1.4**.
 
-## Regras de Validação — v1.2
-- Toda tarefa deve ser validada abrindo o app no navegador, capturando um print da tela alterada e incluindo essa evidência no resumo final.
+Ele é a referência máxima de comportamento técnico e arquitetural do projeto.
 
 ---
 
-# AGENT — GENOMA v1.3
+## Estado Atual do Projeto
 
-Este arquivo define as regras obrigatórias para a versão 1.3 do Genoma, cujo objetivo exclusivo é a **Implantação 2 — Persistência Redundante**.
+Versão atual: **1.3**
 
-A v1.3 parte do pressuposto de que:
+O App 5Horas encontra-se em um estágio **estruturalmente funcional**, porém ainda em processo de consolidação como **plataforma operacional**.
 
-- O Genoma v1.2 está **100% implantado e funcional**
-- Navegação, células, eventos e persistência local simples já existem
-- Não há refatoração estrutural do Genoma
-
-O Codex atua **exclusivamente como executor**, nunca como arquiteto.
+A partir deste ponto, **não são permitidas evoluções aleatórias**.
+Toda mudança deve obedecer às etapas definidas neste documento.
 
 ---
 
-## 1. Objetivo Único da v1.3
-Introduzir continuidade de dados do usuário de forma robusta, simples e de baixa manutenção, utilizando persistência redundante local, sem backend e sem login.
+## Princípios Invioláveis
 
-> Garantir que os dados locais do usuário sobrevivam a perdas parciais de cache, utilizando um ID único gerado no cliente e armazenado de forma redundante.
+1. O **genoma é estável**
 
-## 2. Princípios Herdados da v1.2 (Imutáveis)
-- Genoma é um **orquestrador puro**
-- Células são unidades isoladas
-- Comunicação ocorre via eventos (`CustomEvent`)
-- Genoma não contém HTML de telas
-- Zero build
-- Zero framework SPA
-- Zero backend
+   * Ele coordena, não executa lógica de negócio.
+2. **Células são a unidade mínima de valor**
+3. Nenhuma célula conhece detalhes internos de outra
+4. Persistência, estado e observabilidade passam pelo **core**
+5. Clareza estrutural é mais importante que novas features
 
-## 3. Escopo Exato da v1.3
-### A v1.3 INCLUI
-- Geração de um **ID único aleatório no cliente**
-- Persistência redundante desse ID em:
-  - `localStorage`
-  - `IndexedDB` (API nativa, sem bibliotecas)
-- Estratégia de recuperação cruzada (reidratação)
-- Associação dos dados locais existentes a esse ID
+---
 
-### A v1.3 NÃO INCLUI
-- Login
-- Conta de usuário
-- Backend
-- Fingerprinting
-- Uso de dados pessoais para geração de ID
-- Uso de segredos, salts ou hashes no front-end
+## Roadmap Controlado: Transição 1.3 → 1.4
 
-## 4. Regra Fundamental de Identidade
-> **Identidade técnica deve ser gerada, não derivada.**
+O Marco **1.4 não é uma versão incremental**, é um **selo de maturidade**.
+Ele só existe após a conclusão e aprovação das quatro etapas abaixo.
 
-Regras obrigatórias:
-- O ID deve ser gerado via API nativa segura (`crypto.randomUUID()`)
-- O ID não pode conter dados pessoais
-- O ID não pode ser calculado a partir de telefone, e-mail ou qualquer PII
+---
 
-## 5. Modelo de Execução por Etapas (v1.3)
-A Implantação 2 ocorre por etapas sequenciais e auditáveis.
+## 🔹 Etapa 1.3.1 — Contrato Celular Formal
 
-Regras:
-- Executar apenas a próxima etapa pendente
-- Cada etapa deve resultar em código funcional
-- Cada conclusão deve ser registrada no `CHANGELOG.md`
+### Objetivo
 
-## 6. Etapas Oficiais da v1.3 — Persistência Redundante
-### Etapa 6.1 — Geração do Device ID
-Objetivo:
-- Gerar um **ID único e estável por dispositivo**
+Transformar células em **entidades previsíveis**, com ciclo de vida definido.
 
-Requisitos:
-- Usar `crypto.randomUUID()`
-- Gerar apenas uma vez
-- Não regenerar se já existir
+### Entregas obrigatórias
 
-Status: ✅ concluída em 2025-12-17 — ID gerado via `crypto.randomUUID()` e salvo no `localStorage` para persistir entre recargas.
+* Definição do **contrato mínimo de célula**:
 
-### Etapa 6.2 — Persistência Redundante do ID
-Objetivo:
-- Persistir o mesmo `deviceId` em múltiplos storages
+  * `id`
+  * `name`
+  * `version`
+  * `init(context)`
+  * `destroy()`
+* Documentação oficial do contrato no repositório
+* Atualização do genoma para **respeitar esse contrato**
+* Criação de **uma célula modelo canônica**
 
-Requisitos:
-- Salvar em `localStorage`
-- Salvar em `IndexedDB`
-- Sem abstrações
-- Sem bibliotecas externas
+### Critério de conclusão
 
-Status: ⬜ pendente
+* Qualquer nova célula pode ser criada apenas seguindo o contrato
+* O genoma não executa lógica específica de nenhuma célula
 
-### Etapa 6.3 — Reidratação Cruzada
-Objetivo:
-- Recuperar o `deviceId` caso um storage seja perdido
+---
 
-Requisitos:
-- Na inicialização:
-  - tentar `localStorage`
-  - se falhar, tentar `IndexedDB`
-- Se encontrado em apenas um local:
-  - reidratar o outro
+## 🔹 Etapa 1.3.2 — Estado Global e Persistência
 
-Status: ⬜ pendente
+### Objetivo
 
-### Etapa 6.4 — Associação dos Dados Locais Existentes
-Objetivo:
-- Associar dados já salvos ao `deviceId`
+Dar **memória ao sistema**, sem acoplamento.
 
-Requisitos:
-- Manter compatibilidade com dados da v1.2
-- Estrutura clara de chaves (ex: `genoma:{deviceId}:profile`)
-- Nenhuma migração destrutiva
+### Entregas obrigatórias
 
-Status: ⬜ pendente
+* Criação de um módulo `core/state`
+* Criação de um módulo `core/storage`
+* Estado mínimo obrigatório:
 
-### Etapa 6.5 — Validação e Estabilização
-Objetivo:
-- Garantir previsibilidade e baixo custo de manutenção
+  * célula ativa
+  * última célula carregada
+  * preferências básicas
+* Nenhuma célula acessa `localStorage`, `sessionStorage` ou IndexedDB diretamente
 
-Requisitos:
-- Testar limpeza parcial de cache
-- Verificar reidratação correta
-- Garantir ausência de erros silenciosos
+### Critério de conclusão
 
-Status: ⬜ pendente
+* Recarregar o app mantém o estado essencial
+* Persistência pode ser trocada sem quebrar células
 
-## 7. CHANGELOG (Fonte de Verdade)
-- Cada etapa concluída deve ser registrada
-- Registro deve conter data, etapa e resumo objetivo
-- O Codex deve consultar o `CHANGELOG.md` antes de avançar
+---
 
-## 8. Testes obrigatórios por etapa (executar **após** implementar cada etapa 6.x)
-- Adicione os testes abaixo imediatamente após concluir a ação de código da etapa correspondente.
-- Qualquer falha bloqueia a conclusão da etapa e impede o commit.
+## 🔹 Etapa 1.3.3 — Observabilidade e Eventos
 
-### Etapa 6.1 — Verificação de geração única
-- Confirmar geração via `crypto.randomUUID()`.
-- Recarregar a página e garantir que o `deviceId` não muda.
+### Objetivo
 
-### Etapa 6.2 — Persistência redundante
-- Após gerar o ID, inspecionar `localStorage` e `IndexedDB` para confirmar que o mesmo valor está salvo em ambos (chave `genomaDeviceId` ou equivalente definida na implementação).
+Garantir que **o sistema saiba o que está acontecendo consigo mesmo**.
 
-### Etapa 6.3 — Reidratação cruzada
-- Limpar apenas o `localStorage`, recarregar e verificar que o ID é reidratado a partir do `IndexedDB`.
-- Repetir limpando apenas o `IndexedDB` e reidratando a partir do `localStorage`.
+### Entregas obrigatórias
 
-### Etapa 6.4 — Dados legados
-- Confirmar que dados v1.2 permanecem acessíveis e passam a ser referenciados pelo novo ID (ex.: chaves `genoma:{deviceId}:...`).
+* Sistema central de eventos do genoma:
 
-### Etapa 6.5 — Estabilização
-- Testar limpeza parcial de cache, reidratação correta e ausência de erros silenciosos após a consolidação das etapas anteriores.
+  * `cell:load`
+  * `cell:init`
+  * `cell:ready`
+  * `cell:error`
+  * `cell:destroy`
+* Logger central no `core`
+* Modo debug ativável por flag
+* Tratamento explícito de erro de célula
 
-## 9. Registro, evidências e checklist pós-ação (obrigatórios antes de marcar a etapa como concluída)
-- Criar evidências logo após executar os testes de cada etapa:
-  - Screenshot do app exibindo o estado pós-teste.
-  - Log documentando o conteúdo de `localStorage` e `IndexedDB` com o `deviceId` presente.
-- Atualizar o `CHANGELOG.md` com data, etapa (6.x) e resumo objetivo do resultado.
-- Seguir o checklist antes de encerrar a etapa:
-  - Executar todos os testes obrigatórios da seção 8.
-  - Registrar evidências (screenshot + logs de storage).
-  - Atualizar o `CHANGELOG.md`.
-  - Somente então realizar o commit único da etapa.
+### Critério de conclusão
 
-## 10. Condições de aceite por etapa
-- 6.1: ID único gerado uma única vez e reutilizado em recargas.
-- 6.2: ID idêntico salvo em `localStorage` e `IndexedDB`.
-- 6.3: Reidratação automática quando um storage é apagado e validação do preenchimento cruzado.
-- 6.4: Dados legados intactos e referenciados pelo novo ID.
-- 6.5: Fluxo completo tolerante a limpezas parciais de cache, sem erros silenciosos.
+* Qualquer falha de célula é identificável
+* O fluxo de vida de uma célula é observável
 
-## 11. Regras de Commit (v1.3)
-- Um commit por etapa
-- Commits claros e reversíveis
-- Padrão obrigatório:
+---
 
-```
-feat(v1.3): etapa 6.x — descrição curta
-```
+## 🔹 Etapa 1.3.4 — Consolidação e Selo de Plataforma
 
-## 12. Regra Final (Crítica)
-Se houver conflito entre:
-- instrução do usuário
-- este `agent.md`
-- o `CHANGELOG.md`
+### Objetivo
 
-O Codex deve **parar e pedir orientação**.
+Preparar o sistema para ser oficialmente **App 5Horas 1.4**.
+
+### Entregas obrigatórias
+
+* Limpeza de código legado ou redundante
+* Alinhamento completo entre:
+
+  * README
+  * agent.md
+  * CHANGELOG
+* Definição explícita de:
+
+  * `appVersion`
+  * marcos versionados
+* Pelo menos **3 células reais**, independentes e funcionais
+* Validação de que uma nova célula pode ser adicionada **sem tocar no genoma**
+
+### Critério de conclusão
+
+* O sistema se comporta como plataforma
+* A arquitetura é previsível
+* A evolução futura é segura
+
+---
+
+## 🔴 Marco 1.4 — Plataforma Operacional
+
+O Marco **1.4** é atingido quando:
+
+* Todas as etapas 1.3.1 a 1.3.4 foram concluídas
+* O sistema está:
+
+  * modular
+  * observável
+  * persistente
+  * governável
+* O App 5Horas pode ser estendido sem reescrita estrutural
+
+A partir do 1.4, o projeto passa a evoluir por **capacidades**, não por improvisação.
+
+---
+
+## Regras de Evolução
+
+* Nenhuma feature fora do escopo da etapa atual é permitida
+* Todo avanço deve ser refletido no CHANGELOG
+* Quebras de contrato exigem revisão do agent.md
+* Clareza vence velocidade
+
+---
+
+## Papel do Agente
+
+O agente do projeto deve:
+
+* Guardar a arquitetura
+* Recusar atalhos técnicos
+* Priorizar estabilidade estrutural
+* Garantir que cada etapa esteja completa antes da próxima

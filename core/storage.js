@@ -13,6 +13,20 @@ function isStorageAvailable(candidate) {
   }
 }
 
+const persistenceRequest = navigator?.storage?.persist
+  ? navigator.storage.persist()
+  : null;
+
+if (persistenceRequest?.then) {
+  persistenceRequest
+    .then((granted) => {
+      if (granted) {
+        console.info('Armazenamento protegido contra despejo automático.');
+      }
+    })
+    .catch(() => undefined);
+}
+
 const engine = isStorageAvailable(window?.localStorage) ? window.localStorage : null;
 
 function readFromMemory(key) {

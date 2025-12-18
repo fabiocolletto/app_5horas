@@ -114,6 +114,8 @@ Atualmente são registrados:
 * Preferências básicas (ex.: tema)
 * Perfil do usuário e identidade do dispositivo
 
+Sempre que possível, o app solicita persistência via Storage API para evitar que o navegador remova dados automaticamente; a limpeza manual do armazenamento pelo usuário ainda apagará todas as informações.
+
 As células recebem no `context` apenas funções para ler/atualizar esses dados (`profile`, `preferences`, `updateProfile`, `updatePreferences`), mantendo o acesso ao armazenamento centralizado e permitindo trocar a implementação sem quebrar módulos.
 
 ### Contrato Mínimo de Célula (Etapa 1.3.1)

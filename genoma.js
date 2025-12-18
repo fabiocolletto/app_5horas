@@ -19,16 +19,15 @@ class Genoma {
     this.currentCell = null;
     this.isLoading = false;
 
-    const restoredCell = this.currentCellId || this.state.getLastCell();
-    const hasProfile = Boolean(this.profile);
-    this.defaultCell = hasProfile ? (restoredCell || 'home') : 'sistema.perfil';
-
     this.applyBranding();
     this.validateManifest();
     this.ensureDeviceIdentity();
+    this.ensureProfilePresence();
     this.reportDebugMode();
     this.registerNavigation();
     this.reportBootstrap();
+    const restoredCell = this.currentCellId || this.state.getLastCell();
+    this.defineDefaultCell(restoredCell);
     this.loadDefaultCell();
   }
 
@@ -65,6 +64,24 @@ class Genoma {
     this.deviceId = generated;
     this.state.setDeviceId(generated);
     this.updateStatus('Identidade do dispositivo gerada.');
+  }
+
+  ensureProfilePresence() {
+    this.profile = this.state.getProfile();
+
+    if (this.profile) {
+      return;
+    }
+
+    const deviceSuffix = (this.deviceId || '').slice(0, 8) || crypto.randomUUID().slice(0, 8);
+    const temporaryProfile = {
+      nome: `Convidado ${deviceSuffix}`,
+      papel: 'Perfil temporário',
+      isTemporary: true,
+    };
+
+    this.profile = this.state.setProfile(temporaryProfile);
+    this.updateStatus('Perfil temporário criado. Complete os dados na célula de perfil.');
   }
 
   validateManifest() {
@@ -140,6 +157,11 @@ class Genoma {
     const milestoneTag = this.meta?.milestone ? ` • ${this.meta.milestone}` : '';
     this.updateStatus(`${versionTag}${milestoneTag}. ${baseMessage}`);
     this.logger.debug('Manifesto analisado.', { total, milestone: this.meta?.milestone });
+  }
+
+  defineDefaultCell(restoredCell) {
+    const hasRealProfile = Boolean(this.profile) && !this.profile.isTemporary;
+    this.defaultCell = hasRealProfile ? (restoredCell || 'home') : 'sistema.perfil';
   }
 
   loadDefaultCell() {
@@ -228,7 +250,7 @@ class Genoma {
 
   loadCell(targetId) {
     this.profile = this.state.getProfile();
-    const needsProfile = targetId !== 'sistema.perfil' && !this.profile;
+    const needsProfile = targetId !== 'sistema.perfil' && (!this.profile || this.profile.isTemporary);
     const chosenId = needsProfile ? 'sistema.perfil' : targetId;
 
     if (needsProfile) {

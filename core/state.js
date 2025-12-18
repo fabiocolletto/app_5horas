@@ -22,8 +22,9 @@ function sanitizeProfileData(profile) {
   const nome = typeof profile.nome === 'string' ? profile.nome.trim() : '';
   const papel = typeof profile.papel === 'string' ? profile.papel.trim() : '';
   const hasData = nome.length > 0 || papel.length > 0;
+  const isTemporary = Boolean(profile.isTemporary);
 
-  return hasData ? { nome, papel } : null;
+  return hasData ? { nome, papel, isTemporary } : null;
 }
 
 function sanitizeState(candidate) {

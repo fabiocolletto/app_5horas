@@ -1,5 +1,8 @@
 # CHANGELOG — App 5Horas v1.4
 
+## 2025-12-24
+- Publicação do fluxo de cadastro obrigatório: o Genoma agora inicia em `sistema.perfil` quando não há perfil salvo, mantendo todas as outras células bloqueadas até completar o cadastro.
+
 ## 2025-12-23
 - Melhoria: exportação de configurações agora usa o ID do dispositivo no nome do arquivo (`genoma-state-<id>.json`), e a tela de boas-vindas exibe esse ID para ajudar o usuário a localizar backups salvos localmente.
 

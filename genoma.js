@@ -20,7 +20,8 @@ class Genoma {
     this.isLoading = false;
 
     const restoredCell = this.currentCellId || this.state.getLastCell();
-    this.defaultCell = restoredCell || (this.profile ? 'home' : 'sistema.perfil');
+    const hasProfile = Boolean(this.profile);
+    this.defaultCell = hasProfile ? (restoredCell || 'home') : 'sistema.perfil';
 
     this.applyBranding();
     this.validateManifest();

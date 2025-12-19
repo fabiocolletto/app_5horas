@@ -5,16 +5,17 @@ const PREFERENCES_KEY = 'global.preferences';
 
 let adapterPromise;
 
+const safeParse = (value) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn('Valor inválido no localStorage, ignorando.', error);
+    return null;
+  }
+};
+
 function createLocalStorageAdapter() {
-  const safeParse = (value) => {
-    if (!value) return null;
-    try {
-      return JSON.parse(value);
-    } catch (error) {
-      console.warn('Valor inválido no localStorage, ignorando.', error);
-      return null;
-    }
-  };
 
   return {
     async getProfile() {
@@ -45,25 +46,46 @@ function createLocalStorageAdapter() {
   };
 }
 
-async function migrateLegacyLocalStorage(db) {
+async function migrateLegacyLocalStorage(db, shadowStorage) {
   const legacyProfile = window.localStorage.getItem(PROFILE_KEY);
   const legacyDeviceId = window.localStorage.getItem(DEVICE_KEY);
+  const legacyPreferences = window.localStorage.getItem(PREFERENCES_KEY);
+  const legacyState = window.localStorage.getItem(STATE_KEY);
 
   if (legacyProfile) {
-    try {
-      const parsed = JSON.parse(legacyProfile);
-      if (parsed && typeof parsed === 'object') {
-        await db.profiles.put(parsed, 'current');
-      }
-    } catch (error) {
-      console.warn('Falha ao migrar perfil do localStorage.', error);
+    const parsed = safeParse(legacyProfile);
+    if (parsed && typeof parsed === 'object') {
+      await db.profiles.put(parsed, 'current');
+      window.localStorage.removeItem(PROFILE_KEY);
+      await shadowStorage.saveProfile(parsed);
     }
-    window.localStorage.removeItem(PROFILE_KEY);
   }
 
   if (legacyDeviceId) {
     await db.devices.put({ key: 'device', value: legacyDeviceId });
     window.localStorage.removeItem(DEVICE_KEY);
+    await shadowStorage.saveDeviceId(legacyDeviceId);
+  }
+
+  if (legacyPreferences) {
+    const parsed = safeParse(legacyPreferences);
+    if (parsed && typeof parsed === 'object') {
+      await db.preferences.put({ key: PREFERENCES_KEY, value: parsed });
+      window.localStorage.removeItem(PREFERENCES_KEY);
+      await shadowStorage.savePreferences(parsed);
+    }
+  }
+
+  if (legacyState) {
+    const parsed = safeParse(legacyState);
+    if (parsed && typeof parsed === 'object') {
+      const value = parsed?.value ?? null;
+      if (value) {
+        await db.state.put({ key: STATE_KEY, value });
+        window.localStorage.removeItem(STATE_KEY);
+        await shadowStorage.saveStateSnapshot(value);
+      }
+    }
   }
 }
 
@@ -77,6 +99,7 @@ async function createDexieAdapter() {
     return createLocalStorageAdapter();
   }
 
+  const shadowStorage = createLocalStorageAdapter();
   const Dexie = dexieModule.default;
   const db = new Dexie('GenomaStorage');
 
@@ -89,39 +112,111 @@ async function createDexieAdapter() {
 
   try {
     await db.open();
-    await migrateLegacyLocalStorage(db);
+    await migrateLegacyLocalStorage(db, shadowStorage);
   } catch (error) {
     console.warn('Dexie indisponível. Recuando para localStorage.', error);
     return createLocalStorageAdapter();
   }
 
+  const readWithFallback = async (label, primaryAction, fallbackAction, recoverAction) => {
+    try {
+      const result = await primaryAction();
+      if (result !== undefined && result !== null) {
+        return result;
+      }
+    } catch (error) {
+      console.warn(`Falha ao ler ${label} no Dexie. Usando localStorage.`, error);
+    }
+
+    const fallbackValue = await fallbackAction();
+    if (fallbackValue !== undefined && fallbackValue !== null && typeof recoverAction === 'function') {
+      recoverAction(fallbackValue).catch((error) => {
+        console.warn(`Falha ao ressincronizar ${label} no Dexie.`, error);
+      });
+    }
+    return fallbackValue;
+  };
+
+  const writeWithShadow = async (label, primaryAction, shadowAction) => {
+    try {
+      await primaryAction();
+    } catch (error) {
+      console.warn(`Falha ao salvar ${label} no Dexie. Persistindo apenas em localStorage.`, error);
+      await shadowAction();
+      return;
+    }
+    await shadowAction();
+  };
+
   return {
     async getProfile() {
-      return (await db.profiles.get('current')) || null;
+      return readWithFallback(
+        'perfil',
+        () => db.profiles.get('current'),
+        () => shadowStorage.getProfile(),
+        (profile) => db.profiles.put(profile, 'current'),
+      );
     },
     async saveProfile(profile) {
-      await db.profiles.put(profile, 'current');
+      await writeWithShadow(
+        'perfil',
+        () => db.profiles.put(profile, 'current'),
+        () => shadowStorage.saveProfile(profile),
+      );
     },
     async getDeviceId() {
-      const stored = await db.devices.get('device');
-      return stored?.value || null;
+      return readWithFallback(
+        'deviceId',
+        async () => {
+          const stored = await db.devices.get('device');
+          return stored?.value || null;
+        },
+        () => shadowStorage.getDeviceId(),
+        (deviceId) => db.devices.put({ key: 'device', value: deviceId }),
+      );
     },
     async saveDeviceId(deviceId) {
-      await db.devices.put({ key: 'device', value: deviceId });
+      await writeWithShadow(
+        'deviceId',
+        () => db.devices.put({ key: 'device', value: deviceId }),
+        () => shadowStorage.saveDeviceId(deviceId),
+      );
     },
     async getPreferences() {
-      const stored = await db.preferences.get(PREFERENCES_KEY);
-      return stored?.value || {};
+      return readWithFallback(
+        'preferências',
+        async () => {
+          const stored = await db.preferences.get(PREFERENCES_KEY);
+          return stored?.value ?? null;
+        },
+        () => shadowStorage.getPreferences(),
+        (preferences) => db.preferences.put({ key: PREFERENCES_KEY, value: preferences }),
+      ) || {};
     },
     async savePreferences(preferences) {
-      await db.preferences.put({ key: PREFERENCES_KEY, value: preferences });
+      await writeWithShadow(
+        'preferências',
+        () => db.preferences.put({ key: PREFERENCES_KEY, value: preferences }),
+        () => shadowStorage.savePreferences(preferences),
+      );
     },
     async getStateSnapshot() {
-      const stored = await db.state.get(STATE_KEY);
-      return stored?.value || null;
+      return readWithFallback(
+        'estado',
+        async () => {
+          const stored = await db.state.get(STATE_KEY);
+          return stored?.value ?? null;
+        },
+        () => shadowStorage.getStateSnapshot(),
+        (snapshot) => db.state.put({ key: STATE_KEY, value: snapshot }),
+      );
     },
     async saveStateSnapshot(snapshot) {
-      await db.state.put({ key: STATE_KEY, value: snapshot });
+      await writeWithShadow(
+        'estado',
+        () => db.state.put({ key: STATE_KEY, value: snapshot }),
+        () => shadowStorage.saveStateSnapshot(snapshot),
+      );
     },
   };
 }

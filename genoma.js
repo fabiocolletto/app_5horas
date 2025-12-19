@@ -1,11 +1,11 @@
 import { cellsManifest } from './cells.manifest.js';
 import { getDeviceId, getProfile, initializeStorage, saveDeviceId } from './core/storage.js';
 import { getState, initializeState, setActiveCell } from './core/state.js';
+import { showTransientStatus } from './core/status.js';
 
 class Genoma {
   constructor() {
     this.root = document.getElementById('genoma-root');
-    this.status = document.getElementById('genoma-status');
     this.manifest = Array.isArray(cellsManifest) ? cellsManifest : [];
     this.deviceId = null;
     this.profile = null;
@@ -49,7 +49,7 @@ class Genoma {
       const targetName = typeof target === 'string' ? target.trim() : '';
 
       if (!targetName) {
-        this.updateStatus('Evento de navegação recebido sem destino válido.');
+        this.updateStatus('Evento de navegação recebido sem destino válido.', { type: 'warning' });
         return;
       }
 
@@ -100,13 +100,13 @@ class Genoma {
     const targetName = needsProfile ? 'sistema.perfil' : name;
 
     if (needsProfile) {
-      this.updateStatus('Perfil não encontrado. Redirecionando para cadastro.');
+      this.updateStatus('Perfil não encontrado. Redirecionando para cadastro.', { type: 'warning' });
     }
 
     const cell = this.manifest.find((entry) => entry.name === targetName);
 
     if (!cell) {
-      this.updateStatus(`Célula "${targetName}" não encontrada no manifesto.`);
+      this.updateStatus(`Célula "${targetName}" não encontrada no manifesto.`, { type: 'error' });
       return;
     }
 
@@ -117,7 +117,7 @@ class Genoma {
       const module = await import(cell.module);
 
       if (typeof module.mount !== 'function') {
-        this.updateStatus(`Célula "${targetName}" não expõe a função mount.`);
+        this.updateStatus(`Célula "${targetName}" não expõe a função mount.`, { type: 'error' });
         return;
       }
 
@@ -126,19 +126,17 @@ class Genoma {
         this.currentCell = targetName;
         await setActiveCell(targetName);
       }
-      this.updateStatus(`Célula "${targetName}" carregada.`);
+      this.updateStatus(`Célula "${targetName}" carregada.`, { type: 'success' });
     } catch (error) {
       console.error(error);
-      this.updateStatus(`Falha ao carregar célula "${targetName}".`);
+      this.updateStatus(`Falha ao carregar célula "${targetName}".`, { type: 'error' });
     } finally {
       this.isLoading = false;
     }
   }
 
-  updateStatus(message) {
-    if (this.status) {
-      this.status.textContent = message;
-    }
+  updateStatus(message, options = {}) {
+    showTransientStatus(message, options);
   }
 }
 

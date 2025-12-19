@@ -31,6 +31,7 @@
       flex-direction: column;
       padding: 1.5rem;
       gap: 1rem;
+      padding-bottom: 5rem;
     }
 
     .status {
@@ -38,6 +39,51 @@
       border: 1px dashed rgba(255, 255, 255, 0.3);
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.03);
+    }
+
+    #core-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translate(-50%, 110%);
+      min-width: min(640px, calc(100% - 2rem));
+      max-width: 640px;
+      padding: 0.875rem 1rem;
+      border-radius: 14px;
+      background: rgba(19, 29, 59, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+      color: #f8fbff;
+      opacity: 0;
+      transition: opacity 180ms ease, transform 200ms ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #core-footer.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+
+    #core-footer.status-toast--info {
+      border-color: rgba(102, 178, 255, 0.6);
+      background: rgba(17, 40, 66, 0.92);
+    }
+
+    #core-footer.status-toast--success {
+      border-color: rgba(72, 199, 142, 0.7);
+      background: rgba(21, 56, 43, 0.92);
+    }
+
+    #core-footer.status-toast--warning {
+      border-color: rgba(255, 197, 92, 0.75);
+      background: rgba(55, 44, 12, 0.94);
+    }
+
+    #core-footer.status-toast--error {
+      border-color: rgba(255, 99, 132, 0.7);
+      background: rgba(52, 19, 27, 0.92);
     }
   </style>
 </head>
@@ -52,6 +98,7 @@
     </section>
     <div id="genoma-root" role="main"></div>
   </main>
+  <footer id="core-footer" aria-live="polite" aria-hidden="true"></footer>
   <script type="module" src="./genoma.js"></script>
 </body>
 </html>

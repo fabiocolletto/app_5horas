@@ -59,7 +59,8 @@ export function mount(host) {
     ]);
 
     const hasProfile = Boolean(profile && typeof profile === 'object' && (profile.nome || profile.papel));
-    const preferredCell = [state?.activeCell, state?.lastCell].find((name) => typeof name === 'string' && name.trim());
+    const preferredCell = [state?.activeCell, state?.lastCell]
+      .find((name) => typeof name === 'string' && name.trim() && name !== 'sistema.welcome');
 
     if (preferredCell) {
       status.textContent = `Dados encontrados. Redirecionando para "${preferredCell}"...`;

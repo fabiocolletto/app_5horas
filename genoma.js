@@ -72,26 +72,31 @@ class Genoma {
 
   async loadDefaultCell() {
     const { activeCell, lastCell } = getState();
-    const preferred = [activeCell, lastCell].find((candidate) => typeof candidate === 'string' && candidate.trim().length > 0);
+    const preferred = [activeCell, lastCell].find((candidate) => this.isCellAvailable(candidate));
 
     if (preferred) {
-      const exists = this.manifest.some((entry) => entry.name === preferred);
-      if (exists) {
-        await this.loadCell(preferred);
-        return;
-      }
+      await this.loadCell(preferred);
+      return;
+    }
+
+    if (this.isCellAvailable('sistema.welcome')) {
+      await this.loadCell('sistema.welcome');
+      return;
     }
 
     this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
-    const exists = this.manifest.some((entry) => entry.name === this.defaultCell);
-    if (exists) {
+    if (this.isCellAvailable(this.defaultCell)) {
       await this.loadCell(this.defaultCell);
     }
   }
 
+  isCellAvailable(name) {
+    return typeof name === 'string' && name.trim().length > 0 && this.manifest.some((entry) => entry.name === name);
+  }
+
   async loadCell(name) {
     this.profile = await getProfile();
-    const needsProfile = name !== 'sistema.perfil' && !this.profile;
+    const needsProfile = name !== 'sistema.perfil' && name !== 'sistema.welcome' && !this.profile;
     const targetName = needsProfile ? 'sistema.perfil' : name;
 
     if (needsProfile) {

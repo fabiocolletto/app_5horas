@@ -2,6 +2,8 @@
 
 ## 2025-12-20
 - feat(células): feedback visual ao salvar perfil, cobrindo sucesso, alerta de campos vazios e erro de persistência
+- fix(core): gravação redundante do perfil/estado garantindo Dexie + cópia espelho em localStorage
+- fix(core): migração de preferências e estado para Dexie com reidratação em fallback para manter sincronia com localStorage
 
 ## 2025-12-19
 - feat(core): introdução de `core/storage` com Dexie e migração do legado em `localStorage`

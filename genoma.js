@@ -14,6 +14,11 @@ class Genoma {
     this.isLoading = false;
     this.navigationConnection = null;
     this.fileSystemObserverConnection = null;
+    this.helpPanel = {
+      container: document.getElementById('genoma-help'),
+      message: document.getElementById('genoma-help-message'),
+      steps: document.getElementById('genoma-help-steps'),
+    };
 
     this.defaultCell = 'sistema.launcher';
 
@@ -75,6 +80,7 @@ class Genoma {
   }
 
   async establishPwaDependencies() {
+    this.hideHelp();
     try {
       this.updateStatus('Conectando à Navigation Handler API...');
       this.navigationConnection = await ensureNavigationHandlerConnection({
@@ -92,8 +98,17 @@ class Genoma {
         onChange: (changes) => this.reportFileSystemChanges(changes),
       });
       this.updateStatus('File System Observer API ativa.', { type: 'success' });
+      this.hideHelp();
     } catch (error) {
       this.updateStatus(error?.message || 'File System Observer API indisponível.', { type: 'error' });
+      this.showHelp(
+        'File System Observer API indisponível no navegador.',
+        [
+          'Acesse chrome://flags/#file-system-observer e habilite o recurso.',
+          'Como alternativa, habilite chrome://flags/#enable-experimental-web-platform-features.',
+          'Reinicie o Chrome e reabra o PWA instalado para aplicar as alterações.',
+        ],
+      );
       return false;
     }
 
@@ -203,6 +218,29 @@ class Genoma {
 
   updateStatus(message, options = {}) {
     showTransientStatus(message, options);
+  }
+
+  showHelp(message, steps = []) {
+    const { container, message: messageNode, steps: stepsNode } = this.helpPanel;
+    if (!container || !messageNode || !stepsNode) return;
+
+    messageNode.textContent = message;
+    stepsNode.innerHTML = '';
+    const normalizedSteps = Array.isArray(steps) ? steps.filter(Boolean) : [];
+    normalizedSteps.forEach((step) => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      stepsNode.appendChild(li);
+    });
+    container.hidden = false;
+  }
+
+  hideHelp() {
+    const { container, message, steps } = this.helpPanel;
+    if (!container || !message || !steps) return;
+    container.hidden = true;
+    message.textContent = '';
+    steps.innerHTML = '';
   }
 }
 

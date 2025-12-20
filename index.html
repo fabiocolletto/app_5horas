@@ -41,6 +41,36 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
+    .help {
+      padding: 1rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .help h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .help p {
+      margin: 0 0 0.5rem 0;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .help ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .help[hidden] {
+      display: none;
+    }
+
     #core-footer {
       position: fixed;
       left: 50%;
@@ -95,6 +125,11 @@
     <section class="status" aria-live="polite">
       <p>O Genoma está inicializando e aguardando células registradas.</p>
       <p id="genoma-status"></p>
+    </section>
+    <section id="genoma-help" class="help" aria-live="polite" hidden>
+      <h2>Resolução de problemas</h2>
+      <p id="genoma-help-message"></p>
+      <ol id="genoma-help-steps"></ol>
     </section>
     <div id="genoma-root" role="main"></div>
   </main>

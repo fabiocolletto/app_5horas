@@ -1,6 +1,12 @@
 # CHANGELOG — Genoma v1.2
 
 ## 2025-12-20
+- feat(pwa): genoma agora exige conexão ativa com Navigation Handler API (Chrome) para capturar links na instalação PWA e com File System Observer API para reagir a mudanças locais de arquivos
+- chore(pwa): limpeza das integrações para priorizar o suporte das APIs Google e remover caminhos redundantes
+- docs: README reiniciado na versão 0.0 destacando dependência total das APIs de PWA no Chrome
+- chore: remoção do diretório `tools/` vazio para manter somente arquivos essenciais
+
+## 2025-12-20
 - feat(células): feedback visual ao salvar perfil, cobrindo sucesso, alerta de campos vazios e erro de persistência
 - fix(core): gravação redundante do perfil/estado garantindo Dexie + cópia espelho em localStorage
 - fix(core): migração de preferências e estado para Dexie com reidratação em fallback para manter sincronia com localStorage

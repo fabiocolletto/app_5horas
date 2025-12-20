@@ -2,6 +2,7 @@ import { cellsManifest } from './cells.manifest.js';
 import { getDeviceId, getProfile, initializeStorage, saveDeviceId } from './core/storage.js';
 import { getState, initializeState, setActiveCell } from './core/state.js';
 import { showTransientStatus } from './core/status.js';
+import { ensureFileSystemObserverConnection, ensureNavigationHandlerConnection } from './core/pwa.js';
 
 class Genoma {
   constructor() {
@@ -11,6 +12,8 @@ class Genoma {
     this.profile = null;
     this.currentCell = null;
     this.isLoading = false;
+    this.navigationConnection = null;
+    this.fileSystemObserverConnection = null;
 
     this.defaultCell = 'sistema.launcher';
 
@@ -23,6 +26,10 @@ class Genoma {
     await this.ensureDeviceIdentity();
     await initializeState();
     this.profile = await getProfile();
+    const dependenciesReady = await this.establishPwaDependencies();
+    if (!dependenciesReady) {
+      return;
+    }
     this.registerNavigation();
     this.reportBootstrap();
     await this.loadDefaultCell();
@@ -65,6 +72,68 @@ class Genoma {
     if (this.root) {
       this.root.addEventListener('genoma:navigate', handleNavigation);
     }
+  }
+
+  async establishPwaDependencies() {
+    try {
+      this.updateStatus('Conectando à Navigation Handler API...');
+      this.navigationConnection = await ensureNavigationHandlerConnection({
+        onIntercept: (targetUrl) => this.handleCapturedNavigation(targetUrl),
+      });
+      this.updateStatus('Navigation Handler API conectada.', { type: 'success' });
+    } catch (error) {
+      this.updateStatus(error?.message || 'Navigation Handler API indisponível.', { type: 'error' });
+      return false;
+    }
+
+    try {
+      this.updateStatus('Ativando File System Observer API...');
+      this.fileSystemObserverConnection = await ensureFileSystemObserverConnection({
+        onChange: (changes) => this.reportFileSystemChanges(changes),
+      });
+      this.updateStatus('File System Observer API ativa.', { type: 'success' });
+    } catch (error) {
+      this.updateStatus(error?.message || 'File System Observer API indisponível.', { type: 'error' });
+      return false;
+    }
+
+    return true;
+  }
+
+  handleCapturedNavigation(targetUrl) {
+    if (!targetUrl) {
+      this.updateStatus('Navegação capturada sem destino.', { type: 'warning' });
+      return;
+    }
+
+    this.updateStatus(`Navegação capturada: ${targetUrl}`);
+    try {
+      const parsedUrl = new URL(targetUrl, window.location.origin);
+      const requestedCell = parsedUrl.searchParams.get('cell') || parsedUrl.hash?.replace('#', '');
+      if (this.isCellAvailable(requestedCell)) {
+        this.loadCell(requestedCell);
+      }
+    } catch (error) {
+      console.warn('Não foi possível interpretar a navegação capturada.', error);
+    }
+  }
+
+  reportFileSystemChanges(changes) {
+    if (!Array.isArray(changes) || changes.length === 0) {
+      return;
+    }
+
+    const filesChanged = changes
+      .map((change) => change?.path || change?.entry?.name)
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(', ');
+
+    const message = filesChanged
+      ? `Alterações locais detectadas: ${filesChanged}.`
+      : `Alterações locais detectadas (${changes.length}).`;
+
+    this.updateStatus(message);
   }
 
   reportBootstrap() {

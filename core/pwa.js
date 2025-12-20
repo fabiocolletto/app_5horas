@@ -23,7 +23,9 @@ export async function ensureNavigationHandlerConnection(options = {}) {
   }
 
   if (!isNavigationHandlerAvailable) {
-    throw new Error('Navigation Handler API indisponível; use Chrome/Android WebAPK ou Chrome Desktop com suporte atualizado.');
+    throw new Error(
+      'Navigation Handler API indisponível; ative chrome://flags/#enable-navigation-api (ou #enable-experimental-web-platform-features) e reinicie o Chrome.',
+    );
   }
 
   const { onIntercept } = options;
@@ -64,7 +66,9 @@ export async function ensureFileSystemObserverConnection(options = {}) {
   }
 
   if (!isFileSystemObserverAvailable) {
-    throw new Error('File System Observer API indisponível; habilite o suporte no Chrome com as flags adequadas.');
+    throw new Error(
+      'File System Observer API indisponível; habilite chrome://flags/#file-system-observer (ou #enable-experimental-web-platform-features) e reinicie o Chrome.',
+    );
   }
 
   if (!navigator?.storage?.getDirectory) {

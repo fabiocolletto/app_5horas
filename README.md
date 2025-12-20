@@ -13,6 +13,22 @@ Para executar:
 
 Sem essas APIs ativas o genoma não avança no carregamento das células.
 
+## Flags do Chrome obrigatórias
+
+Para que o Genoma capture navegações e observe o sistema de arquivos local, habilite as seguintes flags e reinicie o navegador:
+
+* **Navigation Handler API**: [`chrome://flags/#enable-navigation-api`](chrome://flags/#enable-navigation-api)
+* **File System Observer API**: [`chrome://flags/#file-system-observer`](chrome://flags/#file-system-observer)
+* Alternativa global: [`chrome://flags/#enable-experimental-web-platform-features`](chrome://flags/#enable-experimental-web-platform-features) (ativa ambas).
+
+Em ambientes desktop, você também pode iniciar o Chrome com os recursos já ligados:
+
+```bash
+chrome --enable-features=NavigationAPI,FileSystemObserver --test-type
+```
+
+Em Android, acesse `chrome://flags` no Chrome ou no WebAPK instalado, aplique as mesmas flags e reinicie.
+
 Estrutura mínima mantida:
 
 * `index.html` — shell do PWA

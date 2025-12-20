@@ -9,6 +9,7 @@
 - feat(pwa): genoma agora exige conexão ativa com Navigation Handler API (Chrome) para capturar links na instalação PWA e com File System Observer API para reagir a mudanças locais de arquivos
 - chore(pwa): limpeza das integrações para priorizar o suporte das APIs Google e remover caminhos redundantes
 - docs: README reiniciado na versão 0.0 destacando dependência total das APIs de PWA no Chrome
+- docs(pwa): instruções explícitas das flags do Chrome para Navigation Handler e File System Observer
 - chore: remoção do diretório `tools/` vazio para manter somente arquivos essenciais
 
 ## 2025-12-20

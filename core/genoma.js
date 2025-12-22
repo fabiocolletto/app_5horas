@@ -1,4 +1,4 @@
-import { cellsManifest } from './cells.manifest.js';
+import { cellsManifest } from './cells/manifest.js';
 import { getDeviceId, getProfile, initializeStorage, saveDeviceId } from './core/storage.js';
 import { getState, initializeState, setActiveCell } from './core/state.js';
 import { showTransientStatus } from './core/status.js';

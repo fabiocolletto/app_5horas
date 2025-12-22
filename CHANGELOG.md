@@ -1,5 +1,10 @@
 # CHANGELOG — Genoma v1.2
 
+## 2025-12-22
+- refactor(células): reescrita da célula `app_school` em DOM puro para rodar sem bundler mantendo estética mobile
+- fix(genoma): libera carregamento do launcher mesmo sem perfil salvo para apresentar os mini apps ao iniciar
+- chore(home): adiciona atalho direto para o launcher a partir da célula home
+
 ## 2025-12-20
 - feat(células): feedback visual ao salvar perfil, cobrindo sucesso, alerta de campos vazios e erro de persistência
 - fix(core): gravação redundante do perfil/estado garantindo Dexie + cópia espelho em localStorage

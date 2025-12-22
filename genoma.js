@@ -12,7 +12,7 @@ class Genoma {
     this.currentCell = null;
     this.isLoading = false;
 
-    this.defaultCell = 'sistema.welcome';
+    this.defaultCell = 'sistema.launcher';
 
     this.initialize();
   }
@@ -44,7 +44,7 @@ class Genoma {
   }
 
   registerNavigation() {
-    window.addEventListener('genoma:navigate', (event) => {
+    const handleNavigation = (event) => {
       const target = event.detail?.target;
       const targetName = typeof target === 'string' ? target.trim() : '';
 
@@ -59,7 +59,12 @@ class Genoma {
       }
 
       this.loadCell(targetName);
-    });
+    };
+
+    window.addEventListener('genoma:navigate', handleNavigation);
+    if (this.root) {
+      this.root.addEventListener('genoma:navigate', handleNavigation);
+    }
   }
 
   reportBootstrap() {
@@ -79,8 +84,10 @@ class Genoma {
       return;
     }
 
-    if (this.isCellAvailable('sistema.welcome')) {
-      await this.loadCell('sistema.welcome');
+    const defaultCandidates = ['sistema.launcher', 'sistema.welcome'];
+    const availableDefault = defaultCandidates.find((candidate) => this.isCellAvailable(candidate));
+    if (availableDefault) {
+      await this.loadCell(availableDefault);
       return;
     }
 
@@ -96,7 +103,8 @@ class Genoma {
 
   async loadCell(name) {
     this.profile = await getProfile();
-    const needsProfile = name !== 'sistema.perfil' && name !== 'sistema.welcome' && !this.profile;
+    const allowWithoutProfile = ['sistema.perfil', 'sistema.welcome', 'sistema.launcher'];
+    const needsProfile = !allowWithoutProfile.includes(name) && !this.profile;
     const targetName = needsProfile ? 'sistema.perfil' : name;
 
     if (needsProfile) {

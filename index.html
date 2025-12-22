@@ -8,132 +8,22 @@
     :root {
       color-scheme: light dark;
       font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #0b132b;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       background: #0b132b;
-      color: #e0e6ed;
     }
 
-    header {
-      padding: 1rem;
-      background: #1c2541;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      gap: 1rem;
-      padding-bottom: 5rem;
-    }
-
-    .status {
-      padding: 1rem;
-      border: 1px dashed rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .help {
-      padding: 1rem;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .help h2 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
-    }
-
-    .help p {
-      margin: 0 0 0.5rem 0;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .help ol {
-      margin: 0;
-      padding-left: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .help[hidden] {
-      display: none;
-    }
-
-    #core-footer {
-      position: fixed;
-      left: 50%;
-      bottom: 1.25rem;
-      transform: translate(-50%, 110%);
-      min-width: min(640px, calc(100% - 2rem));
-      max-width: 640px;
-      padding: 0.875rem 1rem;
-      border-radius: 14px;
-      background: rgba(19, 29, 59, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-      color: #f8fbff;
-      opacity: 0;
-      transition: opacity 180ms ease, transform 200ms ease;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    #core-footer.is-visible {
-      opacity: 1;
-      transform: translate(-50%, 0);
-      pointer-events: auto;
-    }
-
-    #core-footer.status-toast--info {
-      border-color: rgba(102, 178, 255, 0.6);
-      background: rgba(17, 40, 66, 0.92);
-    }
-
-    #core-footer.status-toast--success {
-      border-color: rgba(72, 199, 142, 0.7);
-      background: rgba(21, 56, 43, 0.92);
-    }
-
-    #core-footer.status-toast--warning {
-      border-color: rgba(255, 197, 92, 0.75);
-      background: rgba(55, 44, 12, 0.94);
-    }
-
-    #core-footer.status-toast--error {
-      border-color: rgba(255, 99, 132, 0.7);
-      background: rgba(52, 19, 27, 0.92);
+    #genoma-root {
+      min-height: 100vh;
     }
   </style>
 </head>
 <body>
-  <header>
-    <strong>Genoma v1.2</strong>
-  </header>
-  <main id="genoma-shell">
-    <section class="status" aria-live="polite">
-      <p>O Genoma está inicializando e aguardando células registradas.</p>
-      <p id="genoma-status"></p>
-    </section>
-    <section id="genoma-help" class="help" aria-live="polite" hidden>
-      <h2>Resolução de problemas</h2>
-      <p id="genoma-help-message"></p>
-      <ol id="genoma-help-steps"></ol>
-    </section>
-    <div id="genoma-root" role="main"></div>
-  </main>
-  <footer id="core-footer" aria-live="polite" aria-hidden="true"></footer>
+  <div id="genoma-root" role="main"></div>
   <script type="module" src="./genoma.js"></script>
 </body>
 </html>

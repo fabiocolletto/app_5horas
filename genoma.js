@@ -76,25 +76,14 @@ class Genoma {
   }
 
   async loadDefaultCell() {
-    const { activeCell, lastCell } = getState();
-    const preferred = [activeCell, lastCell].find((candidate) => this.isCellAvailable(candidate));
+    const launcherCell = 'sistema.launcher';
 
-    if (preferred) {
-      await this.loadCell(preferred);
+    if (this.isCellAvailable(launcherCell)) {
+      await this.loadCell(launcherCell);
       return;
     }
 
-    const defaultCandidates = ['sistema.launcher', 'sistema.welcome'];
-    const availableDefault = defaultCandidates.find((candidate) => this.isCellAvailable(candidate));
-    if (availableDefault) {
-      await this.loadCell(availableDefault);
-      return;
-    }
-
-    this.defaultCell = this.profile ? 'home' : 'sistema.perfil';
-    if (this.isCellAvailable(this.defaultCell)) {
-      await this.loadCell(this.defaultCell);
-    }
+    this.updateStatus('Célula "sistema.launcher" não está disponível no manifesto.', { type: 'error' });
   }
 
   isCellAvailable(name) {

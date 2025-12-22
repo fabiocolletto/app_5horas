@@ -2,11 +2,6 @@
 // Cada entrada deve seguir o formato: { name: 'celula.nome', module: './celulas/arquivo.js' }
 
 export const cellsManifest = [
-  { name: 'sistema.launcher', module: './celulas/sistema.launcher.js' },
-  { name: 'sistema.welcome', module: './celulas/sistema.welcome.js' },
-  { name: 'home', module: './celulas/home.js' },
-  { name: 'sistema.perfil', module: './celulas/sistema.perfil.js' },
-  { name: 'finance', module: './celulas/finance.js' },
-  { name: 'education', module: './celulas/education.js' },
-  { name: 'app_school', module: './cells/school/index.js' },
+  { name: 'sis_genoma', module: './core/genoma.js' },
+  { name: 'app_school', module: './cells/school/index.js' }
 ];

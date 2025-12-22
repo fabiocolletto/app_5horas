@@ -25,6 +25,23 @@ export function mount(host) {
   actions.style.gap = '0.75rem';
   actions.style.flexWrap = 'wrap';
 
+  const launcherAction = document.createElement('button');
+  launcherAction.textContent = 'Abrir launcher';
+  launcherAction.style.padding = '0.75rem 1.25rem';
+  launcherAction.style.borderRadius = '12px';
+  launcherAction.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+  launcherAction.style.background = '#f7b267';
+  launcherAction.style.color = '#0b132b';
+  launcherAction.style.cursor = 'pointer';
+  launcherAction.style.fontWeight = '700';
+
+  launcherAction.addEventListener('click', () => {
+    host.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: 'sistema.launcher' },
+      bubbles: true,
+    }));
+  });
+
   const action = document.createElement('button');
   action.textContent = 'Voltar para welcome';
   action.style.padding = '0.75rem 1.25rem';
@@ -93,7 +110,24 @@ export function mount(host) {
     }));
   });
 
-  actions.append(action, profileAction, financeAction, educationAction);
+  const schoolAction = document.createElement('button');
+  schoolAction.textContent = 'Abrir app School';
+  schoolAction.style.padding = '0.75rem 1.25rem';
+  schoolAction.style.borderRadius = '12px';
+  schoolAction.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+  schoolAction.style.background = '#ffd166';
+  schoolAction.style.color = '#0b132b';
+  schoolAction.style.cursor = 'pointer';
+  schoolAction.style.fontWeight = '700';
+
+  schoolAction.addEventListener('click', () => {
+    host.dispatchEvent(new CustomEvent('genoma:navigate', {
+      detail: { target: 'app_school' },
+      bubbles: true,
+    }));
+  });
+
+  actions.append(launcherAction, action, profileAction, financeAction, educationAction, schoolAction);
 
   container.append(title, summary, status, actions);
   host.replaceChildren(container);

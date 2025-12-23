@@ -2,7 +2,7 @@ export const cellsManifest = [
   { 
     name: 'sis_genoma', 
     label: 'Genoma', 
-    module: () => import('./core/genoma.js'), // Função que retorna o import
+    module: () => import('./core/genoma.js'),
     icon: "Home",
     theme: { primary: '#4A90E2', iconBg: '#4A90E2' }
   },

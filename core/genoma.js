@@ -57,4 +57,8 @@ export default function App() {
       )}
     </div>
   );
+// core/genoma.js
+export default function GenomaApp() {
+  return <div>Bem-vindo ao Genoma!</div>;
+}
 }

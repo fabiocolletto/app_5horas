@@ -30,17 +30,30 @@ function createBlockingMessage(error) {
 
   const message = document.createElement('p');
   message.textContent = error?.message || 'Ative as APIs obrigatórias do PWA para continuar.';
-  message.style.margin = '0 0 1.5rem';
+  message.style.margin = '0 0 1rem';
   message.style.lineHeight = '1.5';
   message.style.opacity = '0.9';
 
+  const list = document.createElement('ul');
+  list.style.margin = '0 0 1rem';
+  list.style.paddingLeft = '1.2rem';
+  list.style.lineHeight = '1.6';
+
+  const flagNavigation = document.createElement('li');
+  flagNavigation.textContent = 'chrome://flags/#enable-navigation-api';
+
+  const flagFileSystem = document.createElement('li');
+  flagFileSystem.textContent = 'chrome://flags/#file-system-observer';
+
+  list.append(flagNavigation, flagFileSystem);
+
   const hint = document.createElement('p');
-  hint.textContent = 'Habilite as flags do Chrome para Navigation Handler e File System Observer e reinicie o navegador.';
+  hint.textContent = 'Habilite as flags acima e reinicie o navegador para continuar.';
   hint.style.margin = '0';
   hint.style.fontSize = '0.9rem';
   hint.style.opacity = '0.75';
 
-  card.append(title, message, hint);
+  card.append(title, message, list, hint);
   wrapper.append(card);
   return wrapper;
 }
@@ -51,8 +64,10 @@ async function bootstrap() {
   }
 
   try {
-    await ensureNavigationHandlerConnection();
-    await ensureFileSystemObserverConnection();
+    await Promise.all([
+      ensureNavigationHandlerConnection(),
+      ensureFileSystemObserverConnection(),
+    ]);
   } catch (error) {
     root.replaceChildren(createBlockingMessage(error));
     return;

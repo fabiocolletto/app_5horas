@@ -101,9 +101,19 @@ async function bootstrap() {
     ensureNavigationHandlerConnection(),
     ensureFileSystemObserverConnection(),
   ]);
-  const errors = results
-    .filter((result) => result.status === 'rejected')
-    .map((result) => result.reason);
+  const errors = [];
+  const warnings = [];
+
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      errors.push(result.reason);
+      return;
+    }
+
+    if (result.value?.supported === false && result.value?.reason) {
+      warnings.push(result.value.reason);
+    }
+  });
 
   if (errors.length) {
     root.replaceChildren(createBlockingMessage(errors));
@@ -111,6 +121,10 @@ async function bootstrap() {
   }
 
   mountSingleScreenLauncher(root);
+
+  if (warnings.length) {
+    console.warn('APIs opcionais indisponíveis.', warnings);
+  }
 }
 
 bootstrap();

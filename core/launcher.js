@@ -36,7 +36,13 @@ function openCell(host, cell, onBack) {
   backButton.type = 'button';
   backButton.className = 'back-button';
   backButton.textContent = 'Voltar';
-  backButton.addEventListener('click', onBack);
+  let cleanup = null;
+  backButton.addEventListener('click', () => {
+    if (typeof cleanup === 'function') {
+      cleanup();
+    }
+    onBack();
+  });
 
   const title = document.createElement('strong');
   title.textContent = cell.label;
@@ -54,7 +60,10 @@ function openCell(host, cell, onBack) {
     .module()
     .then((module) => {
       if (typeof module.mount === 'function') {
-        module.mount(content);
+        const maybeCleanup = module.mount(content);
+        if (typeof maybeCleanup === 'function') {
+          cleanup = maybeCleanup;
+        }
         return;
       }
 

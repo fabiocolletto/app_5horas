@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import { 
   School, Users, Building2, UserCheck, Calendar, MapPin, 
   Home, Activity, LayoutGrid, UserPlus, Layout, Database, 
@@ -762,5 +763,27 @@ const App = () => {
     </div>
   );
 };
+
+let root = null;
+
+export function mount(host) {
+  if (!host) {
+    return null;
+  }
+
+  if (root) {
+    root.unmount();
+  }
+
+  root = createRoot(host);
+  root.render(<App />);
+
+  return () => {
+    if (root) {
+      root.unmount();
+      root = null;
+    }
+  };
+}
 
 export default App;

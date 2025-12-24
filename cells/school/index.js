@@ -52,6 +52,20 @@ const getRowId = (row) => row.id || row.Nome || row.Empresa || row.Item || row.n
 
 const generateSecretCode = () => 'SEC-' + Math.random().toString(36).substring(2, 7).toUpperCase();
 
+const TAILWIND_CDN_ID = 'tailwindcss-cdn';
+
+const ensureTailwindStyles = () => {
+  if (document.getElementById(TAILWIND_CDN_ID)) {
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.id = TAILWIND_CDN_ID;
+  script.src = 'https://cdn.tailwindcss.com';
+  script.async = true;
+  document.head.append(script);
+};
+
 /**
  * 1. COMPONENTES ATÔMICOS
  */
@@ -770,6 +784,8 @@ export function mount(host) {
   if (!host) {
     return null;
   }
+
+  ensureTailwindStyles();
 
   if (root) {
     root.unmount();

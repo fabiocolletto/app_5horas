@@ -1,5 +1,5 @@
 import { ensureFileSystemObserverConnection, ensureNavigationHandlerConnection } from './core/pwa.js';
-import { mount as mountSingleScreenLauncher } from './celulas/sistema.launcher.js';
+import { mount as mountSingleScreenLauncher } from './core/launcher.js';
 
 const root = document.getElementById('genoma-root');
 

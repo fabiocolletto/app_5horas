@@ -54,16 +54,46 @@ const generateSecretCode = () => 'SEC-' + Math.random().toString(36).substring(2
 
 const TAILWIND_CDN_ID = 'tailwindcss-cdn';
 
+let tailwindStylesPromise = null;
+
 const ensureTailwindStyles = () => {
-  if (document.getElementById(TAILWIND_CDN_ID)) {
-    return;
+  if (tailwindStylesPromise) {
+    return tailwindStylesPromise;
   }
 
-  const script = document.createElement('script');
-  script.id = TAILWIND_CDN_ID;
-  script.src = 'https://cdn.tailwindcss.com';
-  script.async = true;
-  document.head.append(script);
+  const existingScript = document.getElementById(TAILWIND_CDN_ID);
+  if (existingScript) {
+    if (existingScript.dataset.loaded === 'true' || window?.tailwind) {
+      tailwindStylesPromise = Promise.resolve();
+      return tailwindStylesPromise;
+    }
+
+    tailwindStylesPromise = new Promise((resolve, reject) => {
+      existingScript.addEventListener('load', () => resolve(), { once: true });
+      existingScript.addEventListener(
+        'error',
+        () => reject(new Error('Falha ao carregar estilos do Tailwind.')),
+        { once: true },
+      );
+    });
+
+    return tailwindStylesPromise;
+  }
+
+  tailwindStylesPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.id = TAILWIND_CDN_ID;
+    script.src = 'https://cdn.tailwindcss.com';
+    script.async = true;
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      resolve();
+    };
+    script.onerror = () => reject(new Error('Falha ao carregar estilos do Tailwind.'));
+    document.head.append(script);
+  });
+
+  return tailwindStylesPromise;
 };
 
 /**
@@ -785,16 +815,50 @@ export function mount(host) {
     return null;
   }
 
-  ensureTailwindStyles();
-
   if (root) {
     root.unmount();
   }
 
   root = createRoot(host);
-  root.render(<App />);
+
+  let isMounted = true;
+  const renderFallback = (message) => (
+    <div
+      style={{
+        minHeight: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        background: '#f8fafc',
+        color: '#0f172a',
+        fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+        fontSize: '14px',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+      }}
+    >
+      {message}
+    </div>
+  );
+
+  root.render(renderFallback('Carregando estilos...'));
+
+  ensureTailwindStyles()
+    .then(() => {
+      if (isMounted) {
+        root.render(<App />);
+      }
+    })
+    .catch(() => {
+      if (isMounted) {
+        root.render(renderFallback('Não foi possível carregar os estilos.'));
+      }
+    });
 
   return () => {
+    isMounted = false;
     if (root) {
       root.unmount();
       root = null;

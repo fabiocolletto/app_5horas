@@ -1,4 +1,9 @@
 const BABEL_CDN_URL = 'https://unpkg.com/@babel/standalone/babel.min.js';
+const BARE_IMPORT_MAP = {
+  react: 'https://esm.sh/react@18.3.1',
+  'react-dom/client': 'https://esm.sh/react-dom@18.3.1/client',
+  'lucide-react': 'https://esm.sh/lucide-react@0.474.0?deps=react@18.3.1',
+};
 
 async function ensureBabelReady() {
   if (window.Babel) {
@@ -17,6 +22,17 @@ async function ensureBabelReady() {
   return window.Babel;
 }
 
+function resolveBareImports(source) {
+  const replaceSpecifier = (match, specifier) => {
+    const mapped = BARE_IMPORT_MAP[specifier];
+    return mapped ? match.replace(specifier, mapped) : match;
+  };
+
+  return source
+    .replace(/from\s+['"]([^'"]+)['"]/g, replaceSpecifier)
+    .replace(/import\s+['"]([^'"]+)['"]/g, replaceSpecifier);
+}
+
 export async function importJSXModule(modulePath) {
   const Babel = await ensureBabelReady();
   const response = await fetch(modulePath);
@@ -26,7 +42,8 @@ export async function importJSXModule(modulePath) {
   }
 
   const source = await response.text();
-  const { code } = Babel.transform(source, {
+  const resolvedSource = resolveBareImports(source);
+  const { code } = Babel.transform(resolvedSource, {
     filename: modulePath,
     presets: [['react', { runtime: 'classic' }]],
     sourceType: 'module',

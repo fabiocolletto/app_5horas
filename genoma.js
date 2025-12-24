@@ -3,7 +3,16 @@ import { mount as mountSingleScreenLauncher } from './core/launcher.js';
 
 const root = document.getElementById('genoma-root');
 
-function createBlockingMessage(error) {
+function normalizeErrors(errors) {
+  if (Array.isArray(errors)) {
+    return errors.filter(Boolean);
+  }
+
+  return errors ? [errors] : [];
+}
+
+function createBlockingMessage(errors) {
+  const errorList = normalizeErrors(errors);
   const wrapper = document.createElement('section');
   wrapper.style.minHeight = '100vh';
   wrapper.style.display = 'flex';
@@ -29,10 +38,31 @@ function createBlockingMessage(error) {
   title.style.fontWeight = '700';
 
   const message = document.createElement('p');
-  message.textContent = error?.message || 'Ative as APIs obrigatórias do PWA para continuar.';
+  const hasMultipleErrors = errorList.length > 1;
+  message.textContent = hasMultipleErrors
+    ? 'As APIs obrigatórias do PWA estão indisponíveis.'
+    : errorList[0]?.message || 'Ative as APIs obrigatórias do PWA para continuar.';
   message.style.margin = '0 0 1rem';
   message.style.lineHeight = '1.5';
   message.style.opacity = '0.9';
+
+  let errorDetails = null;
+  if (hasMultipleErrors) {
+    errorDetails = document.createElement('ul');
+    errorDetails.style.margin = '0 0 1rem';
+    errorDetails.style.paddingLeft = '1.2rem';
+    errorDetails.style.lineHeight = '1.6';
+
+    errorList.forEach((error) => {
+      if (!error?.message) {
+        return;
+      }
+
+      const item = document.createElement('li');
+      item.textContent = error.message;
+      errorDetails.append(item);
+    });
+  }
 
   const list = document.createElement('ul');
   list.style.margin = '0 0 1rem';
@@ -53,7 +83,11 @@ function createBlockingMessage(error) {
   hint.style.fontSize = '0.9rem';
   hint.style.opacity = '0.75';
 
-  card.append(title, message, list, hint);
+  if (errorDetails) {
+    card.append(title, message, errorDetails, list, hint);
+  } else {
+    card.append(title, message, list, hint);
+  }
   wrapper.append(card);
   return wrapper;
 }
@@ -63,13 +97,16 @@ async function bootstrap() {
     return;
   }
 
-  try {
-    await Promise.all([
-      ensureNavigationHandlerConnection(),
-      ensureFileSystemObserverConnection(),
-    ]);
-  } catch (error) {
-    root.replaceChildren(createBlockingMessage(error));
+  const results = await Promise.allSettled([
+    ensureNavigationHandlerConnection(),
+    ensureFileSystemObserverConnection(),
+  ]);
+  const errors = results
+    .filter((result) => result.status === 'rejected')
+    .map((result) => result.reason);
+
+  if (errors.length) {
+    root.replaceChildren(createBlockingMessage(errors));
     return;
   }
 

@@ -13,17 +13,21 @@ const isFileSystemObserverAvailable = typeof window !== 'undefined'
 let navigationAbortController = null;
 let fileSystemObserverConnection = null;
 
+function createUnsupportedResult(message) {
+  return { supported: false, reason: new Error(message) };
+}
+
 /**
  * Garante conexão com a Navigation Handler API para que o PWA capture
  * navegações externas automaticamente.
  */
 export async function ensureNavigationHandlerConnection(options = {}) {
   if (navigationAbortController) {
-    return { abort: () => navigationAbortController.abort() };
+    return { abort: () => navigationAbortController.abort(), supported: true };
   }
 
   if (!isNavigationHandlerAvailable) {
-    throw new Error(
+    return createUnsupportedResult(
       'Navigation Handler API indisponível; ative chrome://flags/#enable-navigation-api (ou #enable-experimental-web-platform-features) e reinicie o Chrome.',
     );
   }
@@ -53,7 +57,7 @@ export async function ensureNavigationHandlerConnection(options = {}) {
     });
   }
 
-  return { abort: () => navigationAbortController.abort() };
+  return { abort: () => navigationAbortController.abort(), supported: true };
 }
 
 /**
@@ -62,17 +66,17 @@ export async function ensureNavigationHandlerConnection(options = {}) {
  */
 export async function ensureFileSystemObserverConnection(options = {}) {
   if (fileSystemObserverConnection) {
-    return fileSystemObserverConnection;
+    return { ...fileSystemObserverConnection, supported: true };
   }
 
   if (!isFileSystemObserverAvailable) {
-    throw new Error(
+    return createUnsupportedResult(
       'File System Observer API indisponível; habilite chrome://flags/#file-system-observer (ou #enable-experimental-web-platform-features) e reinicie o Chrome.',
     );
   }
 
   if (!navigator?.storage?.getDirectory) {
-    throw new Error('Não foi possível acessar o Origin Private File System.');
+    return createUnsupportedResult('Não foi possível acessar o Origin Private File System.');
   }
 
   const directoryHandle = await navigator.storage.getDirectory();
@@ -85,5 +89,5 @@ export async function ensureFileSystemObserverConnection(options = {}) {
   observer.observe(directoryHandle, { recursive: true });
 
   fileSystemObserverConnection = { observer, directoryHandle };
-  return fileSystemObserverConnection;
+  return { ...fileSystemObserverConnection, supported: true };
 }

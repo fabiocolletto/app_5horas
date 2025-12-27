@@ -1,0 +1,8 @@
+name = "whatsapp-cloud-worker"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+
+# Configure secrets with:
+#   wrangler secret put WHATSAPP_TOKEN
+#   wrangler secret put WHATSAPP_PHONE_NUMBER_ID
+#   wrangler secret put WHATSAPP_VERIFY_TOKEN
